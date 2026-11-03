@@ -1,6 +1,7 @@
 import { FormEvent, useCallback, useEffect, useState } from "react";
 
-import { api, ApiError, Operation, Page, WorkCenter } from "../api";
+import { api, ApiError, Operation, Page, ScanResult, WorkCenter } from "../api";
+import CameraScan, { cameraSupported } from "../CameraScan";
 import { dec1, qty as fmtQty } from "../format";
 
 const REASONS = ["Edge chipped or lifting", "Wrong dimension", "Surface damage", "Drilling misplaced",
@@ -45,23 +46,34 @@ export default function Station() {
     }
   };
 
-  const onScan = async (e: FormEvent) => {
-    e.preventDefault();
-    const code = scan.trim().toUpperCase().split("/")[0];
+  const [camera, setCamera] = useState(false);
+  const [lastOp, setLastOp] = useState<number | null>(null);
+
+  const submitCode = async (raw: string) => {
+    const code = raw.trim().toUpperCase();
     if (!code) return;
-    const here = ops?.find((o) => o.work_order === code && o.status !== "done");
-    if (here) {
-      setScan("");
-      document.getElementById(`op-${here.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
-      setFlash({ kind: "ok", text: `${code} is in this station's queue.` });
-      return;
+    setScan("");
+    setFlash(null);
+    try {
+      const r = await api<ScanResult>(`/api/work-centers/${station}/scan/`, { method: "POST", body: { code } });
+      const left = r.pieces_total - r.pieces_scanned;
+      const parts = [
+        r.part ? `${r.part.name} ${Math.round(Number(r.part.length_mm))} x ${Math.round(Number(r.part.width_mm))}, piece ${r.part.piece} of ${r.part.qty}.`
+          : `${r.work_order}.`,
+        r.switched_from ? `Clock moved from ${r.switched_from} to ${r.step}.` : r.started ? `Started ${r.work_order} (${r.step}).` : "",
+        r.pieces_total ? (left > 0 ? `${r.pieces_scanned} of ${r.pieces_total} pieces done here.`
+          : `All ${r.pieces_total} pieces done here. Finish the step when the batch is through.`) : "",
+      ];
+      setFlash({ kind: "ok", text: parts.filter(Boolean).join(" ") });
+      setLastOp(r.operation);
+      await load();
+      document.getElementById(`op-${r.operation}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+    } catch (e) {
+      setFlash({ kind: "error", text: e instanceof ApiError ? e.message : "Could not reach the server." });
     }
-    const other = await api<Page<Operation>>(`/api/operations/?open=1&page_size=200`);
-    const next = other.results.find((o) => o.work_order === code);
-    setFlash(next
-      ? { kind: "error", text: `${code} has no step here. Its next open step is at ${next.work_center}.` }
-      : { kind: "error", text: `No open job ${code}. Check the label and scan again.` });
+    document.getElementById("scan")?.focus();
   };
+  const onScan = (e: FormEvent) => { e.preventDefault(); submitCode(scan); };
 
   const running = ops?.find((o) => o.status === "running");
 
@@ -73,17 +85,22 @@ export default function Station() {
             {centers.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}
           </select></label>
         <form className="field grow" onSubmit={onScan}>
-          <span>Scan or type a job label</span>
-          <input id="scan" autoFocus placeholder="WO-000001" value={scan} onChange={(e) => setScan(e.target.value)} />
+          <span>Scan a panel or job label</span>
+          <input id="scan" autoFocus autoComplete="off" placeholder="WO-000001-P03-2 or WO-000001" value={scan}
+            onChange={(e) => setScan(e.target.value)} />
         </form>
+        {cameraSupported() && <button className="btn ghost" onClick={() => setCamera((c) => !c)}>
+          {camera ? "Close camera" : "Use camera"}</button>}
       </div>
-      {flash && <p className={flash.kind}>{flash.text}</p>}
+      {camera && <CameraScan onCode={(c) => { setCamera(false); submitCode(c); }} />}
+      {flash && <p className={flash.kind} role="status">{flash.text}</p>}
       {ops === null ? <p className="muted">Loading…</p> : ops.length === 0 ? (
         <div className="panel"><p className="muted">No jobs waiting at this station.</p></div>
       ) : (
         <div className="stack">
           {ops.map((o) => (
-            <OpCard key={o.id} op={o} now={now} blocked={!!running && running.id !== o.id} act={act} />
+            <OpCard key={o.id} op={o} now={now} blocked={!!running && running.id !== o.id} act={act}
+              highlight={o.id === lastOp} />
           ))}
         </div>
       )}
@@ -91,8 +108,9 @@ export default function Station() {
   );
 }
 
-function OpCard({ op, now, blocked, act }: {
+function OpCard({ op, now, blocked, act, highlight }: {
   op: Operation; now: number; blocked: boolean; act: (fn: () => Promise<string | void>) => Promise<void>;
+  highlight: boolean;
 }) {
   const [finishing, setFinishing] = useState(false);
   const [good, setGood] = useState(fmtQty(op.quantity));
@@ -117,12 +135,18 @@ function OpCard({ op, now, blocked, act }: {
   });
 
   return (
-    <div id={`op-${op.id}`} className={`op ${op.status}`}>
+    <div id={`op-${op.id}`} className={`op ${op.status}${highlight ? " scanned" : ""}`}>
       <div className="op-main">
         <div className="mono">{op.work_order}{op.order_number && ` · ${op.order_number}`}</div>
         <div className="op-title">{op.product} <span className="muted">x {fmtQty(op.quantity)}</span>
           {op.is_rework && <span className="chip bad">Rework</span>}</div>
         <div className="muted small">{op.description}{op.customer && ` · ${op.customer}`}</div>
+        {op.pieces_total > 0 && (
+          <div className="progress pieces" title="Panel pieces scanned at this step">
+            <span className="track"><i style={{ width: `${(op.pieces_scanned / op.pieces_total) * 100}%` }} /></span>
+            <span className="small muted">{op.pieces_scanned} of {op.pieces_total} pieces scanned</span>
+          </div>
+        )}
       </div>
       <div className="op-side">
         <div className={`timer ${over ? "over" : ""}`}>{fmtClock(spent)}</div>

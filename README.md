@@ -71,6 +71,7 @@ The sample prices loaded by `seed_demo` are illustrative ETB figures, not real s
 | `GET /api/work-orders/{id}/cut-list/` | Panels to cut grouped by board, with part IDs and a sheet estimate |
 | `GET /api/work-orders/{id}/cut-list/csv/` | The same cut list as CSV for nesting software |
 | `GET /api/operations/?work_center=EDGE`, `POST .../start/`, `POST .../stop/` | What a station tablet uses |
+| `POST /api/work-centers/{code}/scan/` | A label scanned at a station: `WO-000001` starts the job's step there; `WO-000001-P03-2` also records piece 2 of part 3 |
 | `/api/stock-moves/`, `/api/lots/`, `/api/offcuts/` | Inventory ledger, lots and offcuts |
 | `GET /api/auth/me/`, `POST /api/auth/login/`, `POST /api/auth/logout/` | Sign-in for the web app (session cookie + CSRF) |
 | `GET /api/stock/` | On hand per item in base and pack units, with lots, value and reorder status |

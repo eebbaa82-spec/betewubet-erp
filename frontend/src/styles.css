@@ -165,3 +165,10 @@ h3.gap { margin-top: 16px; }
 .chip.po-sent, .chip.po-partial { background: var(--accent-soft); color: var(--accent); margin-left: 0; }
 .chip.po-cancelled { background: var(--sunk); color: var(--muted); margin-left: 0; }
 .chip.po-received { margin-left: 0; }
+
+/* Station scanning */
+.op.scanned { box-shadow: 0 0 0 2px var(--accent); }
+.progress.pieces { margin-top: 6px; }
+.progress.pieces .track { width: 140px; }
+.camera { margin-bottom: 12px; }
+.camera video { width: min(420px, 100%); aspect-ratio: 4 / 3; object-fit: cover; border-radius: 6px; background: #000; display: block; }

@@ -233,6 +233,19 @@ export interface Operation {
   is_rework: boolean;
   spent_minutes: string;
   running_since: string | null;
+  pieces_total: number;
+  pieces_scanned: number;
+}
+
+export interface ScanResult {
+  operation: number;
+  work_order: string;
+  step: string;
+  started: boolean;
+  switched_from: string | null;
+  part: { part_id: string; piece: number; qty: number; name: string; length_mm: string; width_mm: string; material: string } | null;
+  pieces_total: number;
+  pieces_scanned: number;
 }
 
 export interface WorkOrder {

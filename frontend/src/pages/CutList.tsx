@@ -97,7 +97,7 @@ function Labels({ cl }: { cl: CutListData }) {
   return (
     <>
       <p className="note no-print">
-        {labels.length} {plural(labels.length, "label")}, one per piece, sized 70 x 37 mm for A4 sheets of 24. The QR code holds the part ID.
+        {labels.length} {plural(labels.length, "label")}, one per piece, sized 70 x 37 mm for A4 sheets of 24. The QR code holds the part ID and piece number, for scanning at stations.
       </p>
       <div className="labels">
         {labels.map(({ g, p, n }) => (
@@ -112,11 +112,11 @@ function Labels({ cl }: { cl: CutListData }) {
 function Label({ part, n, board, thickness, cl }: { part: CutPart; n: number; board: string; thickness: string | null; cl: CutListData }) {
   const [qr, setQr] = useState("");
   useEffect(() => {
-    QRCode.toString(part.part_id, { type: "svg", margin: 0, errorCorrectionLevel: "M" }).then(setQr);
-  }, [part.part_id]);
+    QRCode.toString(`${part.part_id}-${n}`, { type: "svg", margin: 0, errorCorrectionLevel: "M" }).then(setQr);
+  }, [part.part_id, n]);
   return (
     <div className="label">
-      <div className="qr" aria-label={`QR code ${part.part_id}`} dangerouslySetInnerHTML={{ __html: qr }} />
+      <div className="qr" aria-label={`QR code ${part.part_id}-${n}`} dangerouslySetInnerHTML={{ __html: qr }} />
       <div className="label-text">
         <strong>{part.name}</strong>
         <span className="mono">{mm(part.length_mm)} x {mm(part.width_mm)}{thickness ? ` x ${Math.round(Number(thickness))}` : ""}</span>
