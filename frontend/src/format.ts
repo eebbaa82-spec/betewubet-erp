@@ -1,0 +1,12 @@
+const etb = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
+const two = new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const one = new Intl.NumberFormat("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+
+export const money = (v: string | number) => `ETB ${etb.format(Number(v))}`;
+export const dec2 = (v: string | number) => two.format(Number(v));
+export const dec1 = (v: string | number) => one.format(Number(v));
+export const qty = (v: string | number) => {
+  const n = Number(v);
+  return Number.isInteger(n) ? String(n) : two.format(n);
+};
+export const today = () => new Date().toISOString().slice(0, 10);
