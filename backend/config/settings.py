@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "apps.maintenance",
     "apps.dispatch",
     "apps.finance",
+    "apps.quality",
 ]
 
 MIDDLEWARE = [

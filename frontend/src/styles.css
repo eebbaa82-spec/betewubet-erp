@@ -215,3 +215,17 @@ tr.sub td { background: var(--sunk); }
   .invoice-doc .letterhead { display: block; border-bottom: 1px solid #000; padding-bottom: 6px; margin-bottom: 10px; }
   .invoice-doc p.print-only { display: block; }
 }
+
+/* Quality */
+.inspection { border-top: 1px solid var(--line); margin-top: 10px; padding-top: 10px; grid-column: 1 / -1; }
+.checks { list-style: none; padding: 0; margin: 0 0 8px; display: grid; gap: 6px; }
+.checks li { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 8px 10px; background: var(--sunk); border-radius: 4px; }
+.checks li.failing { background: var(--bad-soft); }
+.check-text { flex: 1 1 220px; }
+.check-note { flex-basis: 100%; }
+.passfail { display: inline-flex; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+.passfail button { font: inherit; border: 0; background: var(--surface); color: var(--muted); padding: 8px 16px; cursor: pointer; min-width: 64px; }
+.passfail button[aria-pressed="true"] { background: var(--accent); color: var(--surface); }
+.passfail button.fail[aria-pressed="true"] { background: var(--bad); }
+.btn.danger { background: var(--bad); border-color: var(--bad); }
+.chip.pass { background: var(--accent-soft); color: var(--accent); margin-left: 0; }

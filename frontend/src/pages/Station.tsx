@@ -1,6 +1,7 @@
 import { FormEvent, useCallback, useEffect, useState } from "react";
 
-import { api, ApiError, Machine, Operation, Page, ScanResult, WorkCenter } from "../api";
+import { api, ApiError, Checklist, Machine, Operation, Page, ScanResult, WorkCenter } from "../api";
+import InspectionForm from "../InspectionForm";
 import CameraScan, { cameraSupported } from "../CameraScan";
 import { dec1, qty as fmtQty } from "../format";
 
@@ -19,6 +20,11 @@ export default function Station() {
   const [flash, setFlash] = useState<{ kind: "ok" | "error"; text: string } | null>(null);
   const [now, setNow] = useState(Date.now());
   const [downNote, setDownNote] = useState("");
+  const [checklist, setChecklist] = useState<Checklist | null>(null);
+  useEffect(() => {
+    setChecklist(null);
+    if (station) api<Checklist[]>(`/api/checklists/?work_center=${station}`).then((c) => setChecklist(c[0] ?? null)).catch(() => undefined);
+  }, [station]);
 
   useEffect(() => {
     api<WorkCenter[]>("/api/work-centers/").then((c) => {
@@ -109,7 +115,8 @@ export default function Station() {
         <div className="stack">
           {ops.map((o) => (
             <OpCard key={o.id} op={o} now={now} blocked={!!running && running.id !== o.id} act={act}
-              highlight={o.id === lastOp} />
+              highlight={o.id === lastOp} checklist={checklist}
+              onInspected={(t, ok) => { setFlash({ kind: ok ? "ok" : "error", text: t }); load(); }} />
           ))}
         </div>
       )}
@@ -117,11 +124,12 @@ export default function Station() {
   );
 }
 
-function OpCard({ op, now, blocked, act, highlight }: {
+function OpCard({ op, now, blocked, act, highlight, checklist, onInspected }: {
   op: Operation; now: number; blocked: boolean; act: (fn: () => Promise<string | void>) => Promise<void>;
-  highlight: boolean;
+  highlight: boolean; checklist: Checklist | null; onInspected: (text: string, ok: boolean) => void;
 }) {
   const [finishing, setFinishing] = useState(false);
+  const [inspecting, setInspecting] = useState(false);
   const [good, setGood] = useState(fmtQty(op.quantity));
   const [rejected, setRejected] = useState("0");
   const [reason, setReason] = useState(REASONS[0]);
@@ -168,11 +176,24 @@ function OpCard({ op, now, blocked, act, highlight }: {
             </button>
           )}
           {op.status === "running" && <button className="btn ghost" onClick={pause}>Pause</button>}
+          {checklist && op.status !== "queued" && !finishing && !inspecting && (
+            <button className="btn ghost" onClick={() => setInspecting(true)}>Check</button>
+          )}
           {(op.status === "running" || op.status === "paused") && !finishing && (
             <button className="btn" onClick={() => setFinishing(true)}>Finish</button>
           )}
         </div>
       </div>
+      {inspecting && checklist && (
+        <InspectionForm checklist={checklist} workOrderId={op.work_order_id} operationId={op.id} maxQty={Number(op.quantity)}
+          onCancel={() => setInspecting(false)}
+          onDone={(i) => {
+            setInspecting(false);
+            onInspected(i.result === "pass" ? `${op.work_order}: ${checklist.name} passed (${i.number}).`
+              : `${op.work_order}: ${checklist.name} failed (${i.number}).${i.non_conformance ? ` ${i.non_conformance} opened, rework order ${i.rework_order} queued here.` : ""}`,
+            i.result === "pass");
+          }} />
+      )}
       {finishing && (
         <div className="finish">
           <label className="field"><span>Good parts</span>
