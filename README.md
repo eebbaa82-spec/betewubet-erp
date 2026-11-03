@@ -2,7 +2,7 @@
 
 ERP for Betewubet Home and Office Furniture Manufacturing PLC: parametric product configuration and BOMs, multi-UOM inventory with offcuts and lots, production and shop-floor tracking, job costing, and Ethiopian VAT-compliant finance.
 
-This repository currently holds **Phase 1 (foundation)** of the [architecture and roadmap](https://claude.ai/artifact/GvjCjLUhYQCujGbkgjcVRy): the backend for the catalogue, parametric BOMs, inventory, quotes, sales orders, work orders and job costing. The web front end and shop-floor tablet app come next.
+This repository currently holds **Phase 1 (foundation)** of the [architecture and roadmap](https://claude.ai/artifact/GvjCjLUhYQCujGbkgjcVRy): the backend for the catalogue, parametric BOMs, inventory, quotes, sales orders, work orders and job costing, and the first staff screens (sign-in, configure and quote, quotes and orders). The shop-floor tablet app comes next.
 
 ## How it fits together
 
@@ -45,6 +45,16 @@ python manage.py runserver
 
 Then open http://localhost:8000/admin/ for the back office, or http://localhost:8000/api/ for the API.
 
+In a second terminal, start the staff web app (React + TypeScript, in `frontend/`):
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+and open http://localhost:5173. It forwards `/api` and `/admin` to the Django server on port 8000, so sign in with the user you created above. If the web app runs at another address, add it to `CSRF_TRUSTED_ORIGINS`.
+
 Without `DATABASE_URL` the project uses SQLite. To run with PostgreSQL instead: `docker compose up`, or copy `.env.example` to `.env` and point `DATABASE_URL` at your server.
 
 The sample prices loaded by `seed_demo` are illustrative ETB figures, not real supplier prices.
@@ -59,11 +69,13 @@ The sample prices loaded by `seed_demo` are illustrative ETB figures, not real s
 | `GET /api/work-orders/{id}/cost/` | Estimated vs actual cost: material, labour, machine, overhead |
 | `GET /api/operations/?work_center=EDGE`, `POST .../start/`, `POST .../stop/` | What a station tablet uses |
 | `/api/stock-moves/`, `/api/lots/`, `/api/offcuts/` | Inventory ledger, lots and offcuts |
+| `GET /api/auth/me/`, `POST /api/auth/login/`, `POST /api/auth/logout/` | Sign-in for the web app (session cookie + CSRF) |
 
 ## Tests
 
 ```bash
 cd backend && python -m pytest -q
+cd frontend && npm run build      # type-checks and builds the web app
 ```
 
 The test suite runs on every pull request against PostgreSQL 16 (see `.github/workflows/tests.yml`).

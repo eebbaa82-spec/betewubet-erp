@@ -105,7 +105,7 @@ class TemplateParameter(models.Model):
     max_value = models.DecimalField(max_digits=12, decimal_places=3, null=True, blank=True)
     choices = models.JSONField(
         default=list, blank=True,
-        help_text="For choice parameters: allowed values. For item parameters: allowed item codes (empty = any of item_kind).",
+        help_text='For choice parameters: allowed values, or [value, label] pairs. For item parameters: allowed item codes (empty = any of item_kind).',
     )
     item_kind = models.CharField(max_length=16, choices=Item.Kind.choices, blank=True)
     sequence = models.PositiveIntegerField(default=10)

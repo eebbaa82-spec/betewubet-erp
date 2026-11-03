@@ -63,6 +63,11 @@ class ItemViewSet(viewsets.ModelViewSet):
     queryset = Item.objects.select_related("base_uom")
     serializer_class = ItemSerializer
 
+    def get_queryset(self):
+        qs = super().get_queryset()
+        kind = self.request.query_params.get("kind")
+        return qs.filter(kind=kind) if kind else qs
+
     @action(detail=True)
     def stock(self, request, pk=None):
         item = self.get_object()
@@ -73,6 +78,12 @@ class ProductTemplateViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = ProductTemplate.objects.prefetch_related("parameters", "bom_lines", "routing")
     serializer_class = TemplateSerializer
     lookup_field = "code"
+
+    def get_queryset(self):
+        qs = super().get_queryset().filter(active=True)
+        if self.request.query_params.get("sellable"):
+            qs = qs.filter(is_sellable=True)
+        return qs
 
     @action(detail=True, methods=["post"])
     def explode(self, request, code=None):
