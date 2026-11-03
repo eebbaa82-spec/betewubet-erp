@@ -171,3 +171,89 @@ export function choiceValue(c: Choice) {
 export function choiceLabel(c: Choice) {
   return Array.isArray(c) ? c[1] : c;
 }
+
+export interface StockRow {
+  code: string;
+  name: string;
+  kind: string;
+  base_uom: string;
+  track_lots: boolean;
+  on_hand: string;
+  pack: string | null;
+  pack_size: string | null;
+  on_hand_packs: string | null;
+  in_offcuts: string | null;
+  unit_cost: string;
+  value: string;
+  reorder_level: string | null;
+  below_reorder: boolean;
+  lots: { code: string; colour_ref: string; qty: string }[];
+}
+
+export interface Offcut {
+  id: number;
+  code: string;
+  item_code: string;
+  item_name: string;
+  length_mm: number;
+  width_mm: number;
+  area_m2: string;
+  location_code: string;
+  lot_code: string;
+  status: string;
+  source_work_order_number: string;
+  created_at: string;
+}
+
+export interface Location {
+  id: number;
+  code: string;
+  name: string;
+  is_offcut_rack: boolean;
+}
+
+export interface WorkCenter {
+  code: string;
+  name: string;
+}
+
+export interface Operation {
+  id: number;
+  work_order: string;
+  work_order_id: number;
+  sequence: number;
+  work_center: string;
+  description: string;
+  planned_minutes: string;
+  status: "queued" | "running" | "paused" | "done";
+  product: string;
+  quantity: string;
+  order_number: string;
+  customer: string;
+  is_rework: boolean;
+  spent_minutes: string;
+  running_since: string | null;
+}
+
+export interface WorkOrder {
+  id: number;
+  number: string;
+  product: string;
+  configuration: Record<string, string | number>;
+  quantity: string;
+  status: string;
+  status_label: string;
+  due_date: string | null;
+  order_number: string;
+  order_id: number | null;
+  customer: string;
+  rework_of: string | null;
+  estimate: Partial<Estimate>;
+  materials: { item: string; item_name: string; uom: string; planned_qty: string; issued_qty: string }[];
+  operations: Operation[];
+  non_conformances: { number: string; work_center: string; qty: string; reason: string; rework_order: string | null; created_at: string }[];
+  created_at: string;
+}
+
+export type CostLine = { estimate: string; actual: string; variance: string };
+export type CostVariance = Record<"material" | "labour" | "machine" | "overhead" | "total", CostLine>;

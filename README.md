@@ -2,7 +2,7 @@
 
 ERP for Betewubet Home and Office Furniture Manufacturing PLC: parametric product configuration and BOMs, multi-UOM inventory with offcuts and lots, production and shop-floor tracking, job costing, and Ethiopian VAT-compliant finance.
 
-This repository currently holds **Phase 1 (foundation)** of the [architecture and roadmap](https://claude.ai/artifact/GvjCjLUhYQCujGbkgjcVRy): the backend for the catalogue, parametric BOMs, inventory, quotes, sales orders, work orders and job costing, and the first staff screens (sign-in, configure and quote, quotes and orders). The shop-floor tablet app comes next.
+This repository currently holds **Phase 1 (foundation)** of the [architecture and roadmap](https://claude.ai/artifact/GvjCjLUhYQCujGbkgjcVRy): the backend for the catalogue, parametric BOMs, inventory, quotes, sales orders, work orders and job costing, and the staff screens: sign-in, configure and quote, quotes and orders, work orders with estimated vs actual cost, inventory (stock, offcuts, receiving goods) and the shop-floor station screen.
 
 ## How it fits together
 
@@ -70,6 +70,10 @@ The sample prices loaded by `seed_demo` are illustrative ETB figures, not real s
 | `GET /api/operations/?work_center=EDGE`, `POST .../start/`, `POST .../stop/` | What a station tablet uses |
 | `/api/stock-moves/`, `/api/lots/`, `/api/offcuts/` | Inventory ledger, lots and offcuts |
 | `GET /api/auth/me/`, `POST /api/auth/login/`, `POST /api/auth/logout/` | Sign-in for the web app (session cookie + CSRF) |
+| `GET /api/stock/` | On hand per item in base and pack units, with lots, value and reorder status |
+| `POST /api/stock/receive/`, `POST /api/stock/issue/` | Goods received (in packs or base units, lot created if new); material issued to a work order |
+| `POST /api/offcuts/register/` | Put a leftover board piece in stock (300 x 300 mm minimum) |
+| `/api/work-centers/`, `/api/non-conformances/` | Stations; rejects reported at stations, each with its rework order |
 
 ## Tests
 

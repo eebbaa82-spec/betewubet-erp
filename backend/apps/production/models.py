@@ -96,3 +96,28 @@ class TimeLog(models.Model):
         if not self.ended_at:
             return Decimal("0")
         return Decimal((self.ended_at - self.started_at).total_seconds() / 60).quantize(Decimal("0.01"))
+
+
+class NonConformance(models.Model):
+    """A rejected part or batch reported at a station. It opens a rework work order."""
+
+    number = models.CharField(max_length=20, unique=True, blank=True)
+    work_order = models.ForeignKey(WorkOrder, on_delete=models.PROTECT, related_name="non_conformances")
+    operation = models.ForeignKey(WorkOrderOperation, on_delete=models.PROTECT, related_name="non_conformances")
+    qty = models.DecimalField(max_digits=10, decimal_places=2)
+    reason = models.CharField(max_length=120)
+    reported_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True)
+    rework_order = models.ForeignKey(WorkOrder, on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.number} {self.reason}"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if not self.number:
+            self.number = f"NCR-{self.pk:05d}"
+            super().save(update_fields=["number"])
