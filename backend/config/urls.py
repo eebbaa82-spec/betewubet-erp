@@ -4,6 +4,7 @@ from rest_framework.routers import DefaultRouter
 
 from apps.catalog.api import ItemViewSet, ProductTemplateViewSet
 from apps.core.api import LoginView, LogoutView, MeView
+from apps.dispatch.api import DeliveryViewSet, InstallationViewSet, ReadyView
 from apps.inventory.api import (
     IssueView, LocationViewSet, LotViewSet, OffcutRegisterView, OffcutViewSet, ReceiveView, StockMoveViewSet,
     StockSummaryView,
@@ -35,6 +36,8 @@ router.register("purchase-orders", PurchaseOrderViewSet)
 router.register("machines", MachineViewSet)
 router.register("maintenance-plans", PlanViewSet)
 router.register("maintenance-logs", LogViewSet)
+router.register("deliveries", DeliveryViewSet)
+router.register("installations", InstallationViewSet)
 
 admin.site.site_header = "Betewubet ERP"
 admin.site.site_title = "Betewubet ERP"
@@ -51,6 +54,7 @@ urlpatterns = [
     path("api/purchasing/shortages/", ShortagesView.as_view()),
     path("api/purchasing/draft-orders/", DraftOrdersView.as_view()),
     path("api/maintenance/due/", DueView.as_view()),
+    path("api/dispatch/ready/", ReadyView.as_view()),
     path("api/", include(router.urls)),
     path("api-auth/", include("rest_framework.urls")),
 ]

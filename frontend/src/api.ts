@@ -404,3 +404,67 @@ export interface Machine {
   open_logs: MaintenanceLog[];
   plans: PlanStatus[];
 }
+
+export interface ReadyLine {
+  line: number;
+  sequence: number;
+  product: string;
+  description: string;
+  configuration: Record<string, string | number>;
+  ordered: string;
+  made: string;
+  shipped: string;
+  ready: string;
+}
+
+export interface ReadyOrder {
+  order: number;
+  number: string;
+  customer: string;
+  address: string;
+  phone: string;
+  due_date: string | null;
+  lines: ReadyLine[];
+}
+
+export interface Installation {
+  id: number;
+  number: string;
+  delivery: string;
+  order_number: string;
+  customer: string;
+  address: string;
+  contact_phone: string;
+  status: "scheduled" | "done" | "snags";
+  status_label: string;
+  scheduled_date: string;
+  crew: string;
+  completed_at: string | null;
+  signed_off_by: string;
+  snags: string;
+  notes: string;
+  return_visit_of: string | null;
+}
+
+export interface Delivery {
+  id: number;
+  number: string;
+  order_id: number;
+  order_number: string;
+  customer: string;
+  customer_tin: string;
+  status: "planned" | "out" | "delivered" | "cancelled";
+  status_label: string;
+  scheduled_date: string;
+  vehicle: string;
+  driver: string;
+  address: string;
+  contact_phone: string;
+  install_required: boolean;
+  notes: string;
+  dispatched_at: string | null;
+  delivered_at: string | null;
+  received_by: string;
+  lines: { line: number; sequence: number; product: string; description: string; configuration: Record<string, string | number>; quantity: string }[];
+  installations: Installation[];
+}

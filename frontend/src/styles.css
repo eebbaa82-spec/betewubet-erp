@@ -188,3 +188,18 @@ h3.gap { margin-top: 16px; }
 .check input { width: auto; }
 .bad-text { color: var(--bad); }
 .link.danger, button.link.danger { color: var(--bad); }
+
+/* Dispatch */
+textarea { font: inherit; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 7px 8px; width: 100%; box-sizing: border-box; }
+.chip.dn-planned, .chip.in-scheduled { background: var(--amber-soft); color: var(--amber); margin-left: 0; }
+.chip.dn-out { background: var(--accent-soft); color: var(--accent); margin-left: 0; }
+.chip.dn-delivered, .chip.in-done { margin-left: 0; }
+.chip.dn-cancelled { background: var(--sunk); color: var(--muted); margin-left: 0; }
+.chip.in-snags { background: var(--bad-soft); color: var(--bad); margin-left: 0; }
+.signatures { display: grid; grid-template-columns: 2fr 1.5fr 1fr; gap: 24px; margin-top: 48px; }
+.signatures div { border-top: 1px solid #000; padding-top: 4px; font-size: 11px; }
+@media print {
+  .delivery-note .print-only.brand { font-family: var(--display); font-size: 16px; margin: 0 0 4px; }
+  .delivery-note .split { grid-template-columns: 1fr 1fr; }
+  th.print-only, td.print-only { display: table-cell; }
+}

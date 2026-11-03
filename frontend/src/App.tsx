@@ -4,6 +4,7 @@ import { NavLink, Navigate, Route, Routes } from "react-router-dom";
 import { api, User } from "./api";
 import Configure from "./pages/Configure";
 import CutList from "./pages/CutList";
+import Dispatch, { DeliveryNote } from "./pages/Dispatch";
 import Inventory from "./pages/Inventory";
 import Login from "./pages/Login";
 import Maintenance from "./pages/Maintenance";
@@ -45,6 +46,7 @@ export default function App() {
             <NavLink to="/inventory">Inventory</NavLink>
             <NavLink to="/purchasing">Purchasing</NavLink>
             <NavLink to="/station">Station</NavLink>
+            <NavLink to="/dispatch">Dispatch</NavLink>
             <NavLink to="/maintenance">Maintenance</NavLink>
             <a href="/admin/">Back office</a>
           </nav>
@@ -66,6 +68,8 @@ export default function App() {
           <Route path="/inventory" element={<Inventory />} />
           <Route path="/purchasing" element={<Purchasing />} />
           <Route path="/purchasing/:id" element={<PurchaseOrderDetail />} />
+          <Route path="/dispatch" element={<Dispatch />} />
+          <Route path="/dispatch/:id" element={<DeliveryNote />} />
           <Route path="/maintenance" element={<Maintenance />} />
           <Route path="/station" element={<Station />} />
           <Route path="*" element={<p>Page not found.</p>} />
