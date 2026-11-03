@@ -1,3 +1,69 @@
 # Betewubet ERP
 
 ERP for Betewubet Home and Office Furniture Manufacturing PLC: parametric product configuration and BOMs, multi-UOM inventory with offcuts and lots, production and shop-floor tracking, job costing, and Ethiopian VAT-compliant finance.
+
+This repository currently holds **Phase 1 (foundation)** of the [architecture and roadmap](https://claude.ai/artifact/GvjCjLUhYQCujGbkgjcVRy): the backend for the catalogue, parametric BOMs, inventory, quotes, sales orders, work orders and job costing. The web front end and shop-floor tablet app come next.
+
+## How it fits together
+
+| App | What it owns |
+| --- | --- |
+| `core` | Units of measure, work centers with ETB hourly rates, company cost settings (overhead, nesting yield, VAT 15%) |
+| `catalog` | Items (raw materials and bought-in parts only), product templates with parameters, formula-driven BOM lines and routing, the formula engine and BOM explosion |
+| `inventory` | Locations, lots, the append-only stock ledger, offcuts with exact sizes |
+| `sales` | Customers (with TIN and VAT number), quotes and sales orders, configured order lines, pricing from target margin |
+| `production` | Work orders with frozen BOM and estimate, planned materials and operations, shop-floor time logs, estimated vs actual job cost |
+
+Three rules hold the design together:
+
+1. **Products are templates, not part numbers.** A base cabinet is one template with width, height, depth, board, front finish, drawer count and handle as parameters. BOM lines and routing steps use formulas such as `W - 2*board_t`, so any size can be quoted without creating a new item.
+2. **Every stock movement is a ledger row.** Stock moves are never edited or deleted; on-hand quantity and value are sums over the ledger. Boards are stocked in m², edgeband in metres, finishes in litres, hardware in pieces, with pack sizes (sheet, roll, drum) per item.
+3. **The work order is the costing unit.** Confirming a sales order explodes each line, freezes the BOM and cost estimate on a work order, and from then on material issues and scanned time post against it.
+
+## Formulas
+
+Formulas are a small safe language: numbers, parameter names, `+ - * / // % **`, comparisons, `and`/`or`/`not`, `x if cond else y`, and `min max abs round ceil floor`. Item parameters also expose their thickness as `<name>_t`. Routing formulas may also use `n_panels`, `panel_m2`, `edge_m` and `front_m2` for the template's own panels.
+
+```
+H - 2*board_t                       # bottom panel length
+2 if W > 600 else 1                 # one or two doors
+drawers > 0 and front == 'lac'      # line condition
+0.4*edge_m + 0.5*n_panels           # edgebander minutes
+```
+
+## Running it locally
+
+```bash
+cd backend
+python -m venv .venv && . .venv/bin/activate
+pip install -r requirements-dev.txt
+python manage.py migrate
+python manage.py seed_demo           # sample units, materials, cabinet templates, opening stock
+python manage.py createsuperuser
+python manage.py runserver
+```
+
+Then open http://localhost:8000/admin/ for the back office, or http://localhost:8000/api/ for the API.
+
+Without `DATABASE_URL` the project uses SQLite. To run with PostgreSQL instead: `docker compose up`, or copy `.env.example` to `.env` and point `DATABASE_URL` at your server.
+
+The sample prices loaded by `seed_demo` are illustrative ETB figures, not real supplier prices.
+
+## Main API endpoints
+
+| Endpoint | Use |
+| --- | --- |
+| `POST /api/templates/BASE-CAB/explode/` | Configure a product: `{"params": {"W": 800, "drawers": 3}, "qty": 4}` returns parts, hardware, routing, cost estimate and offcuts that fit |
+| `/api/sales-orders/`, `/api/sales-order-lines/` | Quotes and orders; lines are priced on save from the target margin |
+| `POST /api/sales-orders/{id}/confirm/` | Quote to order; creates one work order per line |
+| `GET /api/work-orders/{id}/cost/` | Estimated vs actual cost: material, labour, machine, overhead |
+| `GET /api/operations/?work_center=EDGE`, `POST .../start/`, `POST .../stop/` | What a station tablet uses |
+| `/api/stock-moves/`, `/api/lots/`, `/api/offcuts/` | Inventory ledger, lots and offcuts |
+
+## Tests
+
+```bash
+cd backend && python -m pytest -q
+```
+
+The test suite runs on every pull request against PostgreSQL 16 (see `.github/workflows/tests.yml`).
