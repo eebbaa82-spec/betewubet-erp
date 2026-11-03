@@ -9,6 +9,9 @@ from apps.inventory.api import (
     StockSummaryView,
 )
 from apps.production.api import NonConformanceViewSet, OperationViewSet, WorkCenterViewSet, WorkOrderViewSet
+from apps.purchasing.api import (
+    DraftOrdersView, PurchaseOrderViewSet, ShortagesView, SupplierItemViewSet, SupplierViewSet,
+)
 from apps.sales.api import CustomerViewSet, SalesOrderLineViewSet, SalesOrderViewSet
 
 router = DefaultRouter()
@@ -25,6 +28,9 @@ router.register("work-orders", WorkOrderViewSet)
 router.register("operations", OperationViewSet, basename="operation")
 router.register("work-centers", WorkCenterViewSet)
 router.register("non-conformances", NonConformanceViewSet)
+router.register("suppliers", SupplierViewSet)
+router.register("supplier-items", SupplierItemViewSet)
+router.register("purchase-orders", PurchaseOrderViewSet)
 
 admin.site.site_header = "Betewubet ERP"
 admin.site.site_title = "Betewubet ERP"
@@ -38,6 +44,8 @@ urlpatterns = [
     path("api/stock/receive/", ReceiveView.as_view()),
     path("api/stock/issue/", IssueView.as_view()),
     path("api/offcuts/register/", OffcutRegisterView.as_view()),
+    path("api/purchasing/shortages/", ShortagesView.as_view()),
+    path("api/purchasing/draft-orders/", DraftOrdersView.as_view()),
     path("api/", include(router.urls)),
     path("api-auth/", include("rest_framework.urls")),
 ]

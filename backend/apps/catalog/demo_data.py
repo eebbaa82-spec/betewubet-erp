@@ -4,6 +4,8 @@ not real supplier prices. Used by ``manage.py seed_demo`` and by the tests."""
 from datetime import date
 from decimal import Decimal
 
+from django.db import models
+
 from apps.core.models import UOM, CostSettings, WorkCenter
 
 from .models import BOMLine, Item, ItemUOMConversion, ProductTemplate, RoutingStep, TemplateParameter
@@ -234,3 +236,34 @@ def load_stock():
                        ("CHB-OAK-18", 1620, 610), ("HDF-WHT-3", 1300, 780)]:
         item = Item.objects.get(code=code)
         register_offcut(item, L, W, rack, lot=item.lots.first())
+
+
+SUPPLIERS = [
+    # name, TIN, lead days, kinds or item codes it sells, price factor vs standard cost
+    ("Addis Board Trading", "0012345671", 5, ("board",), Decimal("1.00")),
+    ("Kality Panel Imports", "0023456782", 21, ("board",), Decimal("0.93")),
+    ("Merkato Hardware Supply", "0034567893", 3, ("hardware", "consumable", "edgeband"), Decimal("1.00")),
+    ("Ethio Paints and Finishes", "0045678904", 7, ("finish", "GLUE-PVA"), Decimal("1.00")),
+]
+REORDER_LEVELS = {"SLD-450": 40, "HNG-SC-110": 200, "EB-22-04": 400, "LAC-PU": 40, "GLUE-PVA": 10,
+                  "MDF-WHT-18": Decimal("29.7680"), "SCR-CONF": 2000}
+
+
+def load_suppliers():
+    """Sample suppliers with pack prices (sample figures, not real quotes) and reorder levels."""
+    from apps.purchasing.models import Supplier, SupplierItem
+
+    for code, level in REORDER_LEVELS.items():
+        Item.objects.filter(code=code).update(reorder_level=Decimal(str(level)))
+    for name, tin, days, sells, factor in SUPPLIERS:
+        sup, _ = Supplier.objects.update_or_create(name=name, defaults={"tin": tin, "lead_time_days": days})
+        items = Item.objects.filter(models.Q(kind__in=sells) | models.Q(code__in=sells)).prefetch_related("conversions")
+        for item in items:
+            conv = item.conversions.first()
+            pack_name, pack_qty = (conv.name, conv.base_qty) if conv else (item.base_uom.code, Decimal(1))
+            SupplierItem.objects.update_or_create(supplier=sup, item=item, defaults={
+                "pack_name": pack_name, "pack_qty": pack_qty,
+                "price_per_pack": (item.standard_cost * pack_qty * factor).quantize(Decimal("1")),
+                "min_packs": 10 if item.kind == "board" and factor < 1 else 1,
+                "preferred": factor == 1,
+            })

@@ -13,6 +13,6 @@ export const today = () => new Date().toISOString().slice(0, 10);
 
 /** "3 roll" -> "3 rolls", "8 box" -> "8 boxes"; leaves 1 alone. */
 export const plural = (n: string | number, word: string) => {
-  if (Number(n) === 1) return word;
+  if (Number(n) === 1 || word === "pcs" || word === "") return word;
   return /(s|x|z|ch|sh)$/.test(word) ? `${word}es` : `${word}s`;
 };

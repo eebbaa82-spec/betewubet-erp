@@ -6,6 +6,7 @@ import Configure from "./pages/Configure";
 import CutList from "./pages/CutList";
 import Inventory from "./pages/Inventory";
 import Login from "./pages/Login";
+import Purchasing, { PurchaseOrderDetail } from "./pages/Purchasing";
 import QuoteDetail from "./pages/QuoteDetail";
 import Quotes from "./pages/Quotes";
 import Station from "./pages/Station";
@@ -41,6 +42,7 @@ export default function App() {
             <NavLink to="/quotes">Quotes and orders</NavLink>
             <NavLink to="/work-orders">Work orders</NavLink>
             <NavLink to="/inventory">Inventory</NavLink>
+            <NavLink to="/purchasing">Purchasing</NavLink>
             <NavLink to="/station">Station</NavLink>
             <a href="/admin/">Back office</a>
           </nav>
@@ -60,6 +62,8 @@ export default function App() {
           <Route path="/work-orders/:id" element={<WorkOrderDetail />} />
           <Route path="/work-orders/:id/cut-list" element={<CutList />} />
           <Route path="/inventory" element={<Inventory />} />
+          <Route path="/purchasing" element={<Purchasing />} />
+          <Route path="/purchasing/:id" element={<PurchaseOrderDetail />} />
           <Route path="/station" element={<Station />} />
           <Route path="*" element={<p>Page not found.</p>} />
         </Routes>

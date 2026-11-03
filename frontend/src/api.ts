@@ -291,3 +291,52 @@ export interface CutList {
     parts: CutPart[];
   }[];
 }
+
+export interface Shortage {
+  item: string;
+  item_name: string;
+  kind: string;
+  uom: string;
+  required: string;
+  reorder_level: string;
+  in_stock: string;
+  on_order: string;
+  short: string;
+  supplier: string | null;
+  pack_name: string | null;
+  pack_qty: string | null;
+  suggested_packs: number | null;
+  price_per_pack: string | null;
+  amount: string | null;
+}
+
+export interface PurchaseOrderLine {
+  id: number;
+  item: string;
+  item_name: string;
+  uom: string;
+  track_lots: boolean;
+  pack_name: string;
+  pack_qty: string;
+  packs: string;
+  price_per_pack: string;
+  received_packs: string;
+  open_packs: string;
+  amount: string;
+}
+
+export interface PurchaseOrder {
+  id: number;
+  number: string;
+  supplier: number;
+  supplier_name: string;
+  supplier_tin: string;
+  status: "draft" | "sent" | "partial" | "received" | "cancelled";
+  status_label: string;
+  order_date: string;
+  expected_date: string | null;
+  notes: string;
+  lines: PurchaseOrderLine[];
+  totals: { subtotal: string; vat_rate: string; vat: string; total: string };
+  created_at: string;
+}
