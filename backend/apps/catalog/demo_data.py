@@ -310,3 +310,43 @@ def load_machines():
             MaintenancePlan.objects.update_or_create(machine=m, task=task, defaults={
                 "every_hours": Decimal(hours) if hours else None, "every_days": days,
                 "last_done_hours": Decimal(meter - hours_ago), "last_done_at": now - timedelta(days=days_ago)})
+
+
+CHECKLISTS = [
+    # name, stage, work center, [(text, kind, target, tolerance)]
+    ("Panel saw check", "station", "SAW", [
+        ("Diagonals equal (difference, mm)", "measure", 0, 1),
+        ("No chipping on visible edges", "pass_fail", None, None),
+    ]),
+    ("Edgebanding check", "station", "EDGE", [
+        ("Edge fully bonded, no gaps", "pass_fail", None, None),
+        ("Edge trimmed flush, no overhang", "pass_fail", None, None),
+        ("No glue squeeze-out on faces", "pass_fail", None, None),
+    ]),
+    ("CNC drilling check", "station", "CNC", [
+        ("System hole distance from front edge (mm)", "measure", 37, "0.5"),
+        ("Hinge cup depth (mm)", "measure", 12, "0.5"),
+        ("Holes on 32 mm pitch, none missing", "pass_fail", None, None),
+    ]),
+    ("Final inspection", "final", None, [
+        ("Overall size matches the order (W x H x D)", "pass_fail", None, None),
+        ("Doors and drawers aligned, gaps even", "pass_fail", None, None),
+        ("Hardware complete and working", "pass_fail", None, None),
+        ("No scratches, chips or finish defects", "pass_fail", None, None),
+        ("Packed with corner protection and label attached", "pass_fail", None, None),
+    ]),
+]
+
+
+def load_checklists():
+    """Sample station and final inspection checklists (examples to adapt to the factory's standards)."""
+    from apps.quality.models import Checklist, ChecklistItem
+
+    for name, stage, wc, items in CHECKLISTS:
+        cl, _ = Checklist.objects.update_or_create(name=name, defaults={
+            "stage": stage, "work_center": WorkCenter.objects.filter(code=wc).first() if wc else None})
+        for seq, (text, kind, target, tol) in enumerate(items, start=1):
+            ChecklistItem.objects.update_or_create(checklist=cl, text=text, defaults={
+                "sequence": seq * 10, "kind": kind,
+                "target": Decimal(str(target)) if target is not None else None,
+                "tolerance": Decimal(str(tol)) if tol is not None else None})

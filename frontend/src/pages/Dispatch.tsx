@@ -59,14 +59,15 @@ function ReadyCard({ o }: { o: ReadyOrder }) {
       </div>
       <div className="tbl">
         <table>
-          <thead><tr><th>Item</th><th className="num">Ordered</th><th className="num">Finished</th>
+          <thead><tr><th>Item</th><th className="num">Ordered</th><th className="num">Finished and passed</th>
             <th className="num">Shipped</th><th className="num">Send now</th></tr></thead>
           <tbody>
             {o.lines.map((l) => (
               <tr key={l.line}>
                 <td>{l.product}<div className="small muted">{l.description || configSummary(l.configuration)}</div></td>
                 <td className="num">{fmtQty(l.ordered)}</td>
-                <td className="num">{fmtQty(l.made)}</td>
+                <td className="num">{fmtQty(l.made)}{Number(l.awaiting_inspection) > 0 &&
+                  <div className="small muted">+{fmtQty(l.awaiting_inspection)} awaiting <Link to="/quality">inspection</Link></div>}</td>
                 <td className="num">{fmtQty(l.shipped)}</td>
                 <td className="num">
                   <input className="cell" type="number" min="0" max={l.ready} step="any" aria-label={`Quantity of line ${l.sequence} to send`}

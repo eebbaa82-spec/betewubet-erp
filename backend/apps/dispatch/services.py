@@ -17,9 +17,21 @@ from .models import Delivery, DeliveryLine, Installation
 LIVE = (Delivery.Status.PLANNED, Delivery.Status.OUT, Delivery.Status.DELIVERED)
 
 
+def _finished(line):
+    return list(line.work_orders.filter(status="done", rework_of__isnull=True))
+
+
 def made_qty(line):
-    return line.work_orders.filter(status="done", rework_of__isnull=True).aggregate(
-        t=Sum("quantity"))["t"] or Decimal(0)
+    """Finished and, where a final checklist is in use, passed final inspection."""
+    from apps.quality.services import passed_final
+
+    return sum((wo.quantity for wo in _finished(line) if passed_final(wo)), Decimal(0))
+
+
+def awaiting_inspection_qty(line):
+    from apps.quality.services import passed_final
+
+    return sum((wo.quantity for wo in _finished(line) if not passed_final(wo)), Decimal(0))
 
 
 def shipped_qty(line, exclude_delivery=None):
@@ -38,6 +50,7 @@ def line_status(line):
     return {"line": line.id, "sequence": line.sequence, "product": line.template.name,
             "description": line.description, "configuration": line.configuration,
             "ordered": _q(line.quantity), "made": _q(made), "shipped": _q(shipped),
+            "awaiting_inspection": _q(awaiting_inspection_qty(line)),
             "ready": _q(max(made - shipped, Decimal(0)))}
 
 
@@ -47,7 +60,7 @@ def ready_to_ship():
     out = []
     for o in orders:
         lines = [line_status(l) for l in o.lines.select_related("template")]
-        if any(Decimal(l["ready"]) > 0 for l in lines):
+        if any(Decimal(l["ready"]) > 0 or Decimal(l["awaiting_inspection"]) > 0 for l in lines):
             out.append({"order": o.id, "number": o.number, "customer": o.customer.name,
                         "address": o.site_address or o.customer.address, "phone": o.customer.phone,
                         "due_date": o.due_date, "lines": lines})
@@ -65,7 +78,9 @@ def create_delivery(order, lines, scheduled_date, user=None, **fields):
             raise ValidationError(f"Line {line.sequence} is not on {order.number}.")
         ready = made_qty(line) - shipped_qty(line)
         if qty > ready:
-            raise ValidationError(f"Only {ready:g} of {line.template.name} (line {line.sequence}) are finished and not yet shipped.")
+            waiting = awaiting_inspection_qty(line)
+            extra = f" {waiting:g} more are waiting for final inspection." if waiting else ""
+            raise ValidationError(f"Only {ready:g} of {line.template.name} (line {line.sequence}) are finished and not yet shipped.{extra}")
     fields.setdefault("address", order.site_address or order.customer.address)
     fields.setdefault("contact_phone", order.customer.phone)
     d = Delivery.objects.create(order=order, scheduled_date=scheduled_date, created_by=user, **fields)

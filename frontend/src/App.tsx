@@ -9,6 +9,7 @@ import Inventory from "./pages/Inventory";
 import Login from "./pages/Login";
 import Maintenance from "./pages/Maintenance";
 import Purchasing, { PurchaseOrderDetail } from "./pages/Purchasing";
+import Quality from "./pages/Quality";
 import QuoteDetail from "./pages/QuoteDetail";
 import Quotes from "./pages/Quotes";
 import Station from "./pages/Station";
@@ -46,6 +47,7 @@ export default function App() {
             <NavLink to="/inventory">Inventory</NavLink>
             <NavLink to="/purchasing">Purchasing</NavLink>
             <NavLink to="/station">Station</NavLink>
+            <NavLink to="/quality">Quality</NavLink>
             <NavLink to="/dispatch">Dispatch</NavLink>
             <NavLink to="/maintenance">Maintenance</NavLink>
             <a href="/admin/">Back office</a>
@@ -68,6 +70,7 @@ export default function App() {
           <Route path="/inventory" element={<Inventory />} />
           <Route path="/purchasing" element={<Purchasing />} />
           <Route path="/purchasing/:id" element={<PurchaseOrderDetail />} />
+          <Route path="/quality" element={<Quality />} />
           <Route path="/dispatch" element={<Dispatch />} />
           <Route path="/dispatch/:id" element={<DeliveryNote />} />
           <Route path="/maintenance" element={<Maintenance />} />

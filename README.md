@@ -15,6 +15,7 @@ This repository currently holds **Phase 1 (foundation)** of the [architecture an
 | `production` | Work orders with frozen BOM and estimate, planned materials and operations, shop-floor time logs, estimated vs actual job cost |
 | `purchasing` | Suppliers with pack prices, shortages (open work orders + reorder level − stock − on order), purchase orders and receiving against them |
 | `maintenance` | Machines with running hours from station time, service plans due by hours or days, breakdowns that block their station until repaired |
+| `quality` | Station and final inspection checklists (pass/fail and measured checks with tolerance); a failed check with pieces to rework opens a non-conformance and rework order; jobs must pass final inspection before they can go on a delivery note |
 | `dispatch` | What is finished and not yet shipped, delivery notes with proof of delivery, installation visits with customer sign-off and return visits for snags |
 
 Three rules hold the design together:
@@ -87,6 +88,9 @@ The sample prices loaded by `seed_demo` are illustrative ETB figures, not real s
 | `/api/machines/`, `POST /api/machines/{code}/breakdown/` | Machines with hours, state, open breakdowns and service status; report a breakdown |
 | `GET /api/maintenance/due/`, `POST /api/maintenance-plans/{id}/done/` | Service schedule, most urgent first; record a service done |
 | `/api/maintenance-logs/`, `POST .../close/` | Service and breakdown history; record the repair that closes a breakdown |
+| `/api/checklists/?work_center=&stage=` | Inspection checklists with their checks |
+| `/api/inspections/` (GET, POST) | Record an inspection: answers per check, failed quantity, notes |
+| `GET /api/quality/awaiting-final/` | Finished jobs that have not passed final inspection |
 | `GET /api/dispatch/ready/` | Orders with finished work not yet on a delivery note |
 | `/api/deliveries/`, `POST .../dispatch/`, `.../deliver/`, `.../cancel/` | Delivery notes; `deliver` takes who received the goods and books the installation visit |
 | `/api/installations/`, `POST .../complete/` | Installation visits; sign-off with snags books a return visit |
