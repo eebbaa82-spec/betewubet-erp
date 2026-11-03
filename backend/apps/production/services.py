@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.db import transaction
 from django.utils import timezone
 
@@ -6,7 +8,7 @@ from apps.catalog.models import Item, ProductTemplate
 from apps.core.models import WorkCenter
 
 from . import costing
-from .models import TimeLog, WorkOrder, WorkOrderMaterial, WorkOrderOperation
+from .models import NonConformance, TimeLog, WorkOrder, WorkOrderMaterial, WorkOrderOperation
 
 
 @transaction.atomic
@@ -52,12 +54,15 @@ def start_operation(operation, operator=None):
 
 
 @transaction.atomic
-def stop_operation(operation, good_qty=0, rejected_qty=0, reject_reason="", finished=False):
+def stop_operation(operation, good_qty=0, rejected_qty=0, reject_reason="", finished=False, operator=None):
+    """Close the running time log. Rejected parts open a non-conformance and a rework order."""
     log = operation.time_logs.filter(ended_at__isnull=True).first()
     if log:
         log.ended_at = timezone.now()
         log.good_qty, log.rejected_qty, log.reject_reason = good_qty, rejected_qty, reject_reason
         log.save()
+    if rejected_qty and Decimal(rejected_qty) > 0:
+        report_reject(operation, Decimal(rejected_qty), reject_reason or "Not stated", operator)
     operation.status = WorkOrderOperation.Status.DONE if finished else WorkOrderOperation.Status.PAUSED
     operation.save(update_fields=["status"])
     wo = operation.work_order
@@ -65,3 +70,22 @@ def stop_operation(operation, good_qty=0, rejected_qty=0, reject_reason="", fini
         wo.status = WorkOrder.Status.DONE
         wo.save(update_fields=["status"])
     return log
+
+
+def report_reject(operation, qty, reason, operator=None):
+    """Open a non-conformance and a single-purpose rework work order that redoes the
+    rejected quantity at the station where the defect was found."""
+    wo = operation.work_order
+    per_unit = operation.planned_minutes / wo.quantity if wo.quantity else operation.planned_minutes
+    rework = WorkOrder.objects.create(
+        template=wo.template, configuration=wo.configuration, quantity=qty, sales_line=wo.sales_line,
+        due_date=wo.due_date, rework_of=wo, status=WorkOrder.Status.RELEASED,
+        exploded={"rework_of": wo.number, "reason": reason},
+    )
+    WorkOrderOperation.objects.create(
+        work_order=rework, sequence=10, work_center=operation.work_center,
+        description=f"Rework for {wo.number}: {reason}", planned_minutes=(per_unit * qty).quantize(Decimal("0.01")),
+    )
+    return NonConformance.objects.create(
+        work_order=wo, operation=operation, qty=qty, reason=reason, reported_by=operator, rework_order=rework,
+    )

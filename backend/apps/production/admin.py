@@ -25,3 +25,12 @@ class WorkOrderAdmin(admin.ModelAdmin):
 @admin.register(TimeLog)
 class TimeLogAdmin(admin.ModelAdmin):
     list_display = ["operation", "operator", "started_at", "ended_at", "good_qty", "rejected_qty"]
+
+
+from .models import NonConformance  # noqa: E402
+
+
+@admin.register(NonConformance)
+class NonConformanceAdmin(admin.ModelAdmin):
+    list_display = ["number", "work_order", "operation", "qty", "reason", "rework_order", "created_at"]
+    search_fields = ["number", "work_order__number", "reason"]
