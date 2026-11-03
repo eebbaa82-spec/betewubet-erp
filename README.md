@@ -14,6 +14,7 @@ This repository currently holds **Phase 1 (foundation)** of the [architecture an
 | `sales` | Customers (with TIN and VAT number), quotes and sales orders, configured order lines, pricing from target margin |
 | `production` | Work orders with frozen BOM and estimate, planned materials and operations, shop-floor time logs, estimated vs actual job cost |
 | `purchasing` | Suppliers with pack prices, shortages (open work orders + reorder level − stock − on order), purchase orders and receiving against them |
+| `maintenance` | Machines with running hours from station time, service plans due by hours or days, breakdowns that block their station until repaired |
 
 Three rules hold the design together:
 
@@ -82,6 +83,9 @@ The sample prices loaded by `seed_demo` are illustrative ETB figures, not real s
 | `POST /api/purchasing/draft-orders/` | One draft purchase order per supplier for the current shortages (optional `{"items": [...]}`) |
 | `/api/purchase-orders/`, `POST .../send/`, `.../cancel/`, `.../receive/` | Purchase orders; receiving books stock at the order price with the PO number as reference |
 | `/api/suppliers/`, `/api/supplier-items/` | Suppliers and what each sells, in which pack, at what price |
+| `/api/machines/`, `POST /api/machines/{code}/breakdown/` | Machines with hours, state, open breakdowns and service status; report a breakdown |
+| `GET /api/maintenance/due/`, `POST /api/maintenance-plans/{id}/done/` | Service schedule, most urgent first; record a service done |
+| `/api/maintenance-logs/`, `POST .../close/` | Service and breakdown history; record the repair that closes a breakdown |
 
 ## Tests
 

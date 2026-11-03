@@ -76,6 +76,10 @@ def scan(work_center, code, user=None):
 
     started, switched_from = False, None
     if op.status != WorkOrderOperation.Status.RUNNING:
+        from apps.maintenance.services import down_reason
+        down = down_reason(work_center)
+        if down:
+            raise ValidationError(down)
         busy = WorkOrderOperation.objects.filter(work_center=work_center, status=WorkOrderOperation.Status.RUNNING) \
             .exclude(pk=op.pk).select_related("work_order").first()
         if busy and busy.work_order_id != wo.id:
