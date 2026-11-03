@@ -121,3 +121,20 @@ class NonConformance(models.Model):
         if not self.number:
             self.number = f"NCR-{self.pk:05d}"
             super().save(update_fields=["number"])
+
+
+class PartScan(models.Model):
+    """One panel label scanned at a station: which piece passed which step, when and by whom."""
+
+    operation = models.ForeignKey(WorkOrderOperation, on_delete=models.CASCADE, related_name="part_scans")
+    part_id = models.CharField(max_length=32, help_text="WO-000001-P03")
+    piece = models.PositiveIntegerField(help_text="Which of the part's pieces, from 1.")
+    scanned_at = models.DateTimeField(auto_now_add=True)
+    scanned_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True)
+
+    class Meta:
+        ordering = ["-scanned_at", "-id"]
+        constraints = [models.UniqueConstraint(fields=["operation", "part_id", "piece"], name="one_scan_per_piece_per_step")]
+
+    def __str__(self):
+        return f"{self.part_id}-{self.piece} at {self.operation}"

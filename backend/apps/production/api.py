@@ -6,7 +6,7 @@ from rest_framework.response import Response
 
 from django.http import HttpResponse
 
-from . import costing, cutlist, services
+from . import costing, cutlist, scanning, services
 from django.db.models import Sum
 from django.utils import timezone
 
@@ -49,18 +49,26 @@ class OperationSerializer(serializers.ModelSerializer):
     is_rework = serializers.SerializerMethodField()
     spent_minutes = serializers.SerializerMethodField()
     running_since = serializers.SerializerMethodField()
+    pieces_total = serializers.SerializerMethodField()
+    pieces_scanned = serializers.SerializerMethodField()
 
     class Meta:
         model = WorkOrderOperation
         fields = ["id", "work_order", "work_order_id", "sequence", "work_center", "description", "planned_minutes",
                   "status", "product", "quantity", "order_number", "customer", "is_rework", "spent_minutes",
-                  "running_since"]
+                  "running_since", "pieces_total", "pieces_scanned"]
 
     def get_is_rework(self, obj):
         return obj.work_order.rework_of_id is not None
 
     def get_spent_minutes(self, obj):
         return str(sum((t.minutes for t in obj.time_logs.all()), Decimal(0)))
+
+    def get_pieces_total(self, obj):
+        return sum(scanning.pieces_for(obj).values())
+
+    def get_pieces_scanned(self, obj):
+        return len(obj.part_scans.all())
 
     def get_running_since(self, obj):
         open_log = next((t for t in obj.time_logs.all() if t.ended_at is None), None)
@@ -103,17 +111,28 @@ class StopRequest(serializers.Serializer):
     finished = serializers.BooleanField(default=False)
 
 
+class ScanRequest(serializers.Serializer):
+    code = serializers.CharField(max_length=40)
+
+
 class WorkCenterViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = WorkCenter.objects.all()
     serializer_class = WorkCenterSerializer
     lookup_field = "code"
     pagination_class = None
 
+    @action(detail=True, methods=["post"])
+    def scan(self, request, code=None):
+        """A job or panel label scanned at this station: starts the step and records the piece."""
+        req = ScanRequest(data=request.data)
+        req.is_valid(raise_exception=True)
+        return Response(scanning.scan(self.get_object(), req.validated_data["code"], user=request.user))
+
 
 class WorkOrderViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = WorkOrder.objects.select_related(
         "template", "rework_of", "sales_line__order__customer"
-    ).prefetch_related("materials__item__base_uom", "operations__work_center", "operations__time_logs",
+    ).prefetch_related("materials__item__base_uom", "operations__work_center", "operations__time_logs", "operations__part_scans",
                        "non_conformances__operation__work_center", "non_conformances__rework_order")
     serializer_class = WorkOrderSerializer
 
@@ -153,7 +172,8 @@ class OperationViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         qs = WorkOrderOperation.objects.select_related(
             "work_center", "work_order__template", "work_order__sales_line__order__customer"
-        ).prefetch_related("time_logs").exclude(work_order__status__in=["done", "cancelled"])
+        ).prefetch_related("time_logs", "part_scans", "work_order__operations").exclude(
+            work_order__status__in=["done", "cancelled"])
         p = self.request.query_params
         if p.get("work_center"):
             qs = qs.filter(work_center__code=p["work_center"])
