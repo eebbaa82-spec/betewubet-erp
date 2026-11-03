@@ -3,6 +3,7 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from apps.catalog.api import ItemViewSet, ProductTemplateViewSet
+from apps.core.api import LoginView, LogoutView, MeView
 from apps.inventory.api import LocationViewSet, LotViewSet, OffcutViewSet, StockMoveViewSet
 from apps.production.api import OperationViewSet, WorkOrderViewSet
 from apps.sales.api import CustomerViewSet, SalesOrderLineViewSet, SalesOrderViewSet
@@ -25,6 +26,9 @@ admin.site.site_title = "Betewubet ERP"
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("api/auth/me/", MeView.as_view()),
+    path("api/auth/login/", LoginView.as_view()),
+    path("api/auth/logout/", LogoutView.as_view()),
     path("api/", include(router.urls)),
     path("api-auth/", include("rest_framework.urls")),
 ]

@@ -141,10 +141,12 @@ def _base_cabinet():
         {"name": "D", "label": "Depth (mm)", "kind": "number", "default": "560", "min_value": 300, "max_value": 650},
         {"name": "board", "label": "Carcass board", "kind": "item", "item_kind": "board", "default": "MDF-WHT-18",
          "choices": ["MDF-WHT-18", "CHB-OAK-18", "PLY-BIR-18"]},
-        {"name": "front", "label": "Front finish", "kind": "choice", "default": "mel", "choices": ["mel", "lac", "ven"]},
+        {"name": "front", "label": "Front finish", "kind": "choice", "default": "mel", "choices": [["mel", "Same melamine as carcass"], ["lac", "MDF, lacquer sprayed"],
+                     ["ven", "Oak veneer, clear lacquer"]]},
         {"name": "drawers", "label": "Drawers (0 = doors)", "kind": "number", "default": "3",
          "min_value": 0, "max_value": 4},
-        {"name": "handle", "label": "Handle", "kind": "choice", "default": "bar", "choices": ["bar", "knob", "gola"]},
+        {"name": "handle", "label": "Handle", "kind": "choice", "default": "bar", "choices": [["bar", "Bar handle 160 mm"], ["knob", "Round knob"],
+                     ["gola", "Handleless, routed grip"]]},
     ])
     carcass = {"component": "Carcass", "line_type": "panel", "item_param": "board", "edge_item": "EB-22-04"}
     fronts = {"component": "Fronts", "line_type": "panel"}

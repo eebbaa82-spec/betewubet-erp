@@ -26,6 +26,11 @@ def _d(x, places="0.0001"):
     return Decimal(str(x)).quantize(Decimal(places), rounding=ROUND_HALF_UP)
 
 
+def choice_values(choices):
+    """Choices may be plain values or [value, label] pairs."""
+    return [str(c[0]) if isinstance(c, (list, tuple)) else str(c) for c in choices or []]
+
+
 def _plain(x):
     return format(Decimal(x).normalize(), "f")
 
@@ -137,8 +142,9 @@ def resolve_params(template, given):
             variables[p.name] = float(v)
         elif p.kind == TemplateParameter.Kind.CHOICE:
             v = str(raw)
-            if p.choices and v not in [str(c) for c in p.choices]:
-                errors.append(f"{p.label} must be one of {', '.join(map(str, p.choices))}")
+            allowed = choice_values(p.choices)
+            if allowed and v not in allowed:
+                errors.append(f"{p.label} must be one of {', '.join(allowed)}")
             values[p.name] = v
             variables[p.name] = v
         else:  # item
@@ -147,7 +153,7 @@ def resolve_params(template, given):
             if item is None:
                 errors.append(f"{p.label}: no active item {code}")
                 continue
-            if p.choices and code not in p.choices:
+            if p.choices and code not in choice_values(p.choices):
                 errors.append(f"{p.label}: {code} is not allowed here")
             if p.item_kind and item.kind != p.item_kind:
                 errors.append(f"{p.label}: {code} is not a {p.get_item_kind_display().lower()}")
