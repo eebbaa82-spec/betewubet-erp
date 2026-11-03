@@ -16,3 +16,10 @@ export const plural = (n: string | number, word: string) => {
   if (Number(n) === 1 || word === "pcs" || word === "") return word;
   return /(s|x|z|ch|sh)$/.test(word) ? `${word}es` : `${word}s`;
 };
+
+/** "800 x 720 x 560 mm, drawers 2" from a configured product's parameters. */
+export const configSummary = (c: Record<string, string | number>) => {
+  const dims = ["W", "H", "D"].filter((k) => k in c).map((k) => c[k]).join(" x ");
+  const rest = Object.entries(c).filter(([k]) => !["W", "H", "D"].includes(k)).map(([k, v]) => `${k} ${v}`);
+  return [dims && `${dims} mm`, ...rest].filter(Boolean).join(", ");
+};
