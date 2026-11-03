@@ -13,6 +13,7 @@ This repository currently holds **Phase 1 (foundation)** of the [architecture an
 | `inventory` | Locations, lots, the append-only stock ledger, offcuts with exact sizes |
 | `sales` | Customers (with TIN and VAT number), quotes and sales orders, configured order lines, pricing from target margin |
 | `production` | Work orders with frozen BOM and estimate, planned materials and operations, shop-floor time logs, estimated vs actual job cost |
+| `purchasing` | Suppliers with pack prices, shortages (open work orders + reorder level − stock − on order), purchase orders and receiving against them |
 
 Three rules hold the design together:
 
@@ -76,6 +77,10 @@ The sample prices loaded by `seed_demo` are illustrative ETB figures, not real s
 | `POST /api/stock/receive/`, `POST /api/stock/issue/` | Goods received (in packs or base units, lot created if new); material issued to a work order |
 | `POST /api/offcuts/register/` | Put a leftover board piece in stock (300 x 300 mm minimum) |
 | `/api/work-centers/`, `/api/non-conformances/` | Stations; rejects reported at stations, each with its rework order |
+| `GET /api/purchasing/shortages/` | Items short for open work orders and reorder levels, with the suggested supplier and packs |
+| `POST /api/purchasing/draft-orders/` | One draft purchase order per supplier for the current shortages (optional `{"items": [...]}`) |
+| `/api/purchase-orders/`, `POST .../send/`, `.../cancel/`, `.../receive/` | Purchase orders; receiving books stock at the order price with the PO number as reference |
+| `/api/suppliers/`, `/api/supplier-items/` | Suppliers and what each sells, in which pack, at what price |
 
 ## Tests
 
