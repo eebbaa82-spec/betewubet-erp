@@ -3,6 +3,7 @@ import { NavLink, Navigate, Route, Routes } from "react-router-dom";
 
 import { api, User } from "./api";
 import Configure from "./pages/Configure";
+import CutList from "./pages/CutList";
 import Inventory from "./pages/Inventory";
 import Login from "./pages/Login";
 import QuoteDetail from "./pages/QuoteDetail";
@@ -57,6 +58,7 @@ export default function App() {
           <Route path="/quotes/:id" element={<QuoteDetail />} />
           <Route path="/work-orders" element={<WorkOrders />} />
           <Route path="/work-orders/:id" element={<WorkOrderDetail />} />
+          <Route path="/work-orders/:id/cut-list" element={<CutList />} />
           <Route path="/inventory" element={<Inventory />} />
           <Route path="/station" element={<Station />} />
           <Route path="*" element={<p>Page not found.</p>} />

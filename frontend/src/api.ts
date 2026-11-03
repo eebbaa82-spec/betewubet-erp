@@ -257,3 +257,37 @@ export interface WorkOrder {
 
 export type CostLine = { estimate: string; actual: string; variance: string };
 export type CostVariance = Record<"material" | "labour" | "machine" | "overhead" | "total", CostLine>;
+
+export interface CutPart {
+  part_id: string;
+  name: string;
+  path: string;
+  length_mm: string;
+  width_mm: string;
+  qty: number;
+  grain_locked: boolean;
+  edge_item: string;
+  edge_name: string;
+  edge_mm_per_piece: string;
+}
+
+export interface CutList {
+  work_order: string;
+  product: string;
+  quantity: string;
+  order_number: string;
+  customer: string;
+  due_date: string | null;
+  nesting_yield: string;
+  total_pieces: number;
+  materials: {
+    item: string;
+    item_name: string;
+    thickness_mm: string | null;
+    sheet: string;
+    pieces: number;
+    area_m2: string;
+    sheets_estimate: number | null;
+    parts: CutPart[];
+  }[];
+}

@@ -128,3 +128,34 @@ h3.gap { margin-top: 16px; }
 .op .btn { padding: 10px 18px; font-size: 15px; }
 .finish { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px; background: var(--sunk); border-radius: 4px; }
 .finish .wide { grid-column: 1 / -1; }
+
+/* Cut list and panel labels */
+.toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.toolbar .tabs { margin: 0 auto 0 0; }
+.cut-group + .cut-group { margin-top: 12px; }
+.cut-head { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
+.cut-head h3 { margin: 0; }
+.print-only { display: none; }
+.labels { display: grid; grid-template-columns: repeat(auto-fill, 70mm); gap: 4px; justify-content: start; }
+.label { width: 70mm; height: 37mm; box-sizing: border-box; padding: 2.5mm; display: flex; gap: 2.5mm; align-items: center;
+  background: #fff; color: #000; border: 1px dashed var(--line); border-radius: 2px; overflow: hidden; break-inside: avoid; }
+.label .qr { flex: 0 0 22mm; height: 22mm; }
+.label .qr svg { width: 100%; height: 100%; display: block; }
+.label-text { display: flex; flex-direction: column; min-width: 0; font-size: 8pt; line-height: 1.25; }
+.label-text strong { font-size: 9.5pt; }
+.label-text .mono { font-size: 8pt; }
+.trunc { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+@media print {
+  @page { size: A4; margin: 12mm; }
+  @page labels { size: A4; margin: 0; }
+  body { background: #fff; color: #000; }
+  .topbar, .no-print { display: none !important; }
+  .print-only { display: block; }
+  main { padding: 0 !important; max-width: none !important; }
+  .panel { border: 0; padding: 0; }
+  .stack { gap: 0 !important; }
+  .labels { page: labels; grid-template-columns: repeat(3, 70mm); gap: 0; padding-top: 0.5mm; }
+  .label { border: 0; border-radius: 0; }
+  a { color: inherit; text-decoration: none; }
+}
