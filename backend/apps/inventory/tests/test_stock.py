@@ -13,7 +13,9 @@ pytestmark = pytest.mark.django_db
 
 def test_opening_stock_is_in_base_units(demo):
     mdf = Item.objects.get(code="MDF-WHT-18")
-    assert on_hand(mdf).quantize(Decimal("0.01")) == Decimal("136.93")  # 46 sheets x 2.9768 m2
+    offcuts = sum(o.area_m2 for o in Offcut.objects.filter(item=mdf))
+    assert (on_hand(mdf) - offcuts).quantize(Decimal("0.01")) == Decimal("136.93")  # 46 sheets x 2.9768 m2
+    assert offcuts > 0  # offcuts are booked through the ledger too
 
 
 def test_ledger_rows_cannot_be_edited_or_deleted(demo):

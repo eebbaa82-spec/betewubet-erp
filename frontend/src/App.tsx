@@ -3,9 +3,12 @@ import { NavLink, Navigate, Route, Routes } from "react-router-dom";
 
 import { api, User } from "./api";
 import Configure from "./pages/Configure";
+import Inventory from "./pages/Inventory";
 import Login from "./pages/Login";
 import QuoteDetail from "./pages/QuoteDetail";
 import Quotes from "./pages/Quotes";
+import Station from "./pages/Station";
+import { WorkOrderDetail, WorkOrders } from "./pages/WorkOrders";
 
 const UserContext = createContext<User | null>(null);
 export const useUser = () => useContext(UserContext);
@@ -35,6 +38,9 @@ export default function App() {
           <nav>
             <NavLink to="/configure">Configure and quote</NavLink>
             <NavLink to="/quotes">Quotes and orders</NavLink>
+            <NavLink to="/work-orders">Work orders</NavLink>
+            <NavLink to="/inventory">Inventory</NavLink>
+            <NavLink to="/station">Station</NavLink>
             <a href="/admin/">Back office</a>
           </nav>
           <span className="who">
@@ -49,6 +55,10 @@ export default function App() {
           <Route path="/configure" element={<Configure />} />
           <Route path="/quotes" element={<Quotes />} />
           <Route path="/quotes/:id" element={<QuoteDetail />} />
+          <Route path="/work-orders" element={<WorkOrders />} />
+          <Route path="/work-orders/:id" element={<WorkOrderDetail />} />
+          <Route path="/inventory" element={<Inventory />} />
+          <Route path="/station" element={<Station />} />
           <Route path="*" element={<p>Page not found.</p>} />
         </Routes>
       </main>

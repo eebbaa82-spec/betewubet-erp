@@ -87,3 +87,44 @@ dl.totals { max-width: 360px; margin: 16px 0 0 auto; }
 .tabs button[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: var(--surface); }
 .login { min-height: 100vh; display: grid; place-items: center; padding: 16px; }
 .login form { width: min(360px, 100%); }
+
+/* inventory, work orders, station */
+.small-tabs { margin: 0; }
+.chip.bad { background: var(--bad-soft); color: var(--bad); }
+.chip.okc { background: var(--accent-soft); color: var(--accent); margin-left: 0; }
+.chip.st-running { background: var(--accent-soft); color: var(--accent); margin-left: 0; }
+.chip.st-paused { background: var(--amber-soft); color: var(--amber); margin-left: 0; }
+.chip.st-done, .chip.st-queued { margin-left: 0; }
+.narrow { max-width: 640px; }
+.inline-form { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; padding: 12px; margin: 12px 0; background: var(--sunk); border-radius: 4px; }
+.inline-form .field { flex: 1 1 140px; }
+.inline-form .full { flex-basis: 100%; }
+h3.gap { margin-top: 16px; }
+.progress { display: flex; align-items: center; gap: 8px; }
+.progress .track { width: 80px; height: 6px; background: var(--sunk); border-radius: 3px; overflow: hidden; }
+.progress .track i { display: block; height: 100%; background: var(--accent); }
+.legend { display: flex; gap: 16px; font-size: 12px; color: var(--muted); margin-bottom: 10px; flex-wrap: wrap; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+.legend i.est, .bars .est { background: var(--line); }
+.legend i.act, .bars .act { background: var(--accent); }
+.legend i.over, .bars .act.over { background: var(--bad); }
+.bar-row { display: grid; grid-template-columns: 100px minmax(0, 1fr) 110px; gap: 10px; align-items: center; margin-bottom: 10px; font-size: 13px; }
+.bars { position: relative; height: 22px; }
+.bars .est, .bars .act { position: absolute; left: 0; height: 9px; border-radius: 2px; }
+.bars .est { top: 1px; }
+.bars .act { top: 12px; }
+.row.end { justify-content: flex-end; margin-top: 6px; }
+.station-bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; margin-bottom: 14px; }
+.station-bar .field { width: 240px; }
+.station-bar .grow { flex: 1; min-width: 220px; }
+.station .ok, .station .error { margin-bottom: 12px; }
+.op { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 16px; padding: 14px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+.op.running { border-color: var(--accent); background: var(--accent-soft); }
+.op.paused { border-color: var(--amber); }
+.op-title { font-weight: 600; font-size: 16px; }
+.op-side { text-align: right; }
+.timer { font: 500 24px var(--mono); font-variant-numeric: tabular-nums; }
+.timer.over { color: var(--bad); }
+.op .btn { padding: 10px 18px; font-size: 15px; }
+.finish { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px; background: var(--sunk); border-radius: 4px; }
+.finish .wide { grid-column: 1 / -1; }

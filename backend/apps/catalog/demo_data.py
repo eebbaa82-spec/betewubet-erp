@@ -210,8 +210,8 @@ def _base_cabinet():
 
 def load_stock():
     """Opening stock, lots and a few offcuts so the inventory screens have data."""
-    from apps.inventory.models import Location, Lot, Offcut
-    from apps.inventory.services import receive
+    from apps.inventory.models import Location, Lot
+    from apps.inventory.services import receive, register_offcut
 
     main, _ = Location.objects.get_or_create(code="MAIN", defaults={"name": "Main store"})
     rack, _ = Location.objects.get_or_create(code="OC-RACK", defaults={"name": "Offcut rack", "is_offcut_rack": True})
@@ -230,9 +230,7 @@ def load_stock():
         lot = Lot.objects.create(item=item, code=f"L-{code}-01", received_on=date(2026, 10, 15)) \
             if item.track_lots else None
         receive(item, qty, item.standard_cost, main, lot=lot, reference="OPENING")
-    for n, (code, L, W) in enumerate([("MDF-WHT-18", 1180, 580), ("MDF-WHT-18", 760, 540),
-                                      ("MDF-WHT-18", 720, 560), ("CHB-OAK-18", 1620, 610),
-                                      ("HDF-WHT-3", 1300, 780)], start=1):
+    for code, L, W in [("MDF-WHT-18", 1180, 580), ("MDF-WHT-18", 760, 540), ("MDF-WHT-18", 720, 560),
+                       ("CHB-OAK-18", 1620, 610), ("HDF-WHT-3", 1300, 780)]:
         item = Item.objects.get(code=code)
-        Offcut.objects.create(code=f"OC-{n:05d}", item=item, lot=item.lots.first(), length_mm=L, width_mm=W,
-                              location=rack)
+        register_offcut(item, L, W, rack, lot=item.lots.first())
