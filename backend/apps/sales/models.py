@@ -12,6 +12,9 @@ class Customer(TimeStamped):
     name = models.CharField(max_length=160)
     tin = models.CharField("TIN", max_length=20, blank=True, help_text="Taxpayer identification number.")
     vat_reg_no = models.CharField("VAT registration no.", max_length=30, blank=True)
+    withholds_tax = models.BooleanField(
+        "withholding agent", default=False,
+        help_text="Deducts withholding tax from payments and gives a withholding receipt.")
     phone = models.CharField(max_length=30, blank=True)
     email = models.EmailField(blank=True)
     address = models.TextField(blank=True)

@@ -9,6 +9,8 @@ import Inventory from "./pages/Inventory";
 import Login from "./pages/Login";
 import Maintenance from "./pages/Maintenance";
 import Purchasing, { PurchaseOrderDetail } from "./pages/Purchasing";
+import Finance from "./pages/Finance";
+import InvoiceView from "./pages/InvoiceView";
 import Quality from "./pages/Quality";
 import QuoteDetail from "./pages/QuoteDetail";
 import Quotes from "./pages/Quotes";
@@ -50,6 +52,7 @@ export default function App() {
             <NavLink to="/quality">Quality</NavLink>
             <NavLink to="/dispatch">Dispatch</NavLink>
             <NavLink to="/maintenance">Maintenance</NavLink>
+            <NavLink to="/finance">Finance</NavLink>
             <a href="/admin/">Back office</a>
           </nav>
           <span className="who">
@@ -73,6 +76,8 @@ export default function App() {
           <Route path="/quality" element={<Quality />} />
           <Route path="/dispatch" element={<Dispatch />} />
           <Route path="/dispatch/:id" element={<DeliveryNote />} />
+          <Route path="/finance" element={<Finance />} />
+          <Route path="/finance/invoices/:id" element={<InvoiceView />} />
           <Route path="/maintenance" element={<Maintenance />} />
           <Route path="/station" element={<Station />} />
           <Route path="*" element={<p>Page not found.</p>} />
