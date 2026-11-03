@@ -415,6 +415,7 @@ export interface ReadyLine {
   made: string;
   shipped: string;
   ready: string;
+  awaiting_inspection: string;
 }
 
 export interface ReadyOrder {
@@ -467,4 +468,54 @@ export interface Delivery {
   received_by: string;
   lines: { line: number; sequence: number; product: string; description: string; configuration: Record<string, string | number>; quantity: string }[];
   installations: Installation[];
+}
+
+export interface ChecklistItem {
+  id: number;
+  sequence: number;
+  text: string;
+  kind: "pass_fail" | "measure";
+  target: string | null;
+  tolerance: string | null;
+}
+
+export interface Checklist {
+  id: number;
+  name: string;
+  stage: "station" | "final";
+  work_center: string | null;
+  items: ChecklistItem[];
+}
+
+export interface Inspection {
+  id: number;
+  number: string;
+  work_order: string;
+  work_order_id: number;
+  product: string;
+  customer: string;
+  checklist_name: string;
+  stage: "station" | "final";
+  work_center: string;
+  result: "pass" | "fail";
+  result_label: string;
+  failed_qty: string;
+  notes: string;
+  non_conformance: string | null;
+  rework_order: string | null;
+  inspector: string;
+  created_at: string;
+  results: { item: number; text: string; passed: boolean; value: string | null; note: string }[];
+}
+
+export interface AwaitingFinal {
+  id: number;
+  number: string;
+  product: string;
+  configuration: Record<string, string | number>;
+  quantity: string;
+  order_number: string;
+  customer: string;
+  due_date: string | null;
+  last_result: "pass" | "fail" | null;
 }

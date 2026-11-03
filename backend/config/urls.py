@@ -14,6 +14,7 @@ from apps.production.api import NonConformanceViewSet, OperationViewSet, WorkCen
 from apps.purchasing.api import (
     DraftOrdersView, PurchaseOrderViewSet, ShortagesView, SupplierItemViewSet, SupplierViewSet,
 )
+from apps.quality.api import AwaitingFinalView, ChecklistViewSet, InspectionViewSet
 from apps.sales.api import CustomerViewSet, SalesOrderLineViewSet, SalesOrderViewSet
 
 router = DefaultRouter()
@@ -38,6 +39,8 @@ router.register("maintenance-plans", PlanViewSet)
 router.register("maintenance-logs", LogViewSet)
 router.register("deliveries", DeliveryViewSet)
 router.register("installations", InstallationViewSet)
+router.register("checklists", ChecklistViewSet)
+router.register("inspections", InspectionViewSet)
 
 admin.site.site_header = "Betewubet ERP"
 admin.site.site_title = "Betewubet ERP"
@@ -55,6 +58,7 @@ urlpatterns = [
     path("api/purchasing/draft-orders/", DraftOrdersView.as_view()),
     path("api/maintenance/due/", DueView.as_view()),
     path("api/dispatch/ready/", ReadyView.as_view()),
+    path("api/quality/awaiting-final/", AwaitingFinalView.as_view()),
     path("api/", include(router.urls)),
     path("api-auth/", include("rest_framework.urls")),
 ]
