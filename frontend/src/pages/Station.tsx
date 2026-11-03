@@ -1,6 +1,6 @@
 import { FormEvent, useCallback, useEffect, useState } from "react";
 
-import { api, ApiError, Operation, Page, ScanResult, WorkCenter } from "../api";
+import { api, ApiError, Machine, Operation, Page, ScanResult, WorkCenter } from "../api";
 import CameraScan, { cameraSupported } from "../CameraScan";
 import { dec1, qty as fmtQty } from "../format";
 
@@ -18,6 +18,7 @@ export default function Station() {
   const [scan, setScan] = useState("");
   const [flash, setFlash] = useState<{ kind: "ok" | "error"; text: string } | null>(null);
   const [now, setNow] = useState(Date.now());
+  const [downNote, setDownNote] = useState("");
 
   useEffect(() => {
     api<WorkCenter[]>("/api/work-centers/").then((c) => {
@@ -29,8 +30,14 @@ export default function Station() {
 
   const load = useCallback(async () => {
     if (!station) return;
-    const p = await api<Page<Operation>>(`/api/operations/?work_center=${station}&open=1&page_size=200`);
+    const [p, machines] = await Promise.all([
+      api<Page<Operation>>(`/api/operations/?work_center=${station}&open=1&page_size=200`),
+      api<Machine[]>("/api/machines/").catch(() => [] as Machine[]),
+    ]);
     setOps(p.results);
+    const here = machines.filter((m) => m.work_center === station);
+    const down = here.length > 0 && here.every((m) => m.state === "down");
+    setDownNote(down ? here.map((m) => `${m.name}: ${m.open_logs.find((l) => l.machine_down)?.description ?? "down"}`).join("; ") : "");
   }, [station]);
   useEffect(() => { setOps(null); load(); const t = setInterval(load, 30000); return () => clearInterval(t); }, [load]);
   useEffect(() => { const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t); }, []);
@@ -92,6 +99,8 @@ export default function Station() {
         {cameraSupported() && <button className="btn ghost" onClick={() => setCamera((c) => !c)}>
           {camera ? "Close camera" : "Use camera"}</button>}
       </div>
+      {downNote && <p className="error">This station is down ({downNote}). Jobs cannot be started here until the
+        repair is recorded on the Maintenance page.</p>}
       {camera && <CameraScan onCode={(c) => { setCamera(false); submitCode(c); }} />}
       {flash && <p className={flash.kind} role="status">{flash.text}</p>}
       {ops === null ? <p className="muted">Loading…</p> : ops.length === 0 ? (

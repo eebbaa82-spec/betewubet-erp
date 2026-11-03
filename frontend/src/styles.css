@@ -172,3 +172,19 @@ h3.gap { margin-top: 16px; }
 .progress.pieces .track { width: 140px; }
 .camera { margin-bottom: 12px; }
 .camera video { width: min(420px, 100%); aspect-ratio: 4 / 3; object-fit: cover; border-radius: 6px; background: #000; display: block; }
+
+/* Maintenance */
+.machines { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+.machine p { margin: 6px 0; }
+.machine.st-down { border-color: var(--bad); }
+.machine.st-overdue { border-color: var(--amber); }
+.row.tight { margin-bottom: 0; align-items: flex-start; }
+.chip.m-down { background: var(--bad-soft); color: var(--bad); margin-left: 0; }
+.chip.m-overdue { background: var(--amber-soft); color: var(--amber); margin-left: 0; }
+.chip.m-soon { background: var(--sunk); color: var(--fg); margin-left: 0; }
+.chip.m-ok { background: var(--accent-soft); color: var(--accent); margin-left: 0; }
+.open-log { border-top: 1px solid var(--line); padding-top: 8px; margin: 8px 0; }
+.check { display: flex; gap: 8px; align-items: center; font-size: 13px; }
+.check input { width: auto; }
+.bad-text { color: var(--bad); }
+.link.danger, button.link.danger { color: var(--bad); }

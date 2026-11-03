@@ -267,3 +267,46 @@ def load_suppliers():
                 "min_packs": 10 if item.kind == "board" and factor < 1 else 1,
                 "preferred": factor == 1,
             })
+
+
+MACHINES = [
+    # code, name, work center, make/model, meter hours, [(task, every hours, every days, done hours ago, done days ago)]
+    ("SAW-01", "Sliding table panel saw", "SAW", "Sample 3200 mm sliding saw", 4210, [
+        ("Change main and scoring blades", 40, None, 38, 6),
+        ("Clean and lubricate sliding carriage", None, 7, 30, 8),
+    ]),
+    ("EDGE-01", "Edgebander", "EDGE", "Sample single-sided edgebander", 3120, [
+        ("Clean glue pot and pressure rollers", 30, 7, 12, 3),
+        ("Sharpen or replace trimming knives", 120, None, 60, 20),
+    ]),
+    ("CNC-01", "CNC drilling and routing centre", "CNC", "Sample 3-axis nesting router", 2650, [
+        ("Grease spindle and linear guides", 100, None, 97, 15),
+        ("Clean vacuum table and check pump filter", None, 14, 40, 5),
+    ]),
+    ("SPRAY-01", "Spray booth", "SPRAY", "Sample dry-filter booth", 1800, [
+        ("Replace booth exhaust filters", None, 14, 50, 13),
+    ]),
+    ("COMP-01", "Air compressor", None, "Sample 7.5 kW screw compressor", 9100, [
+        ("Drain water from tank and dryer", None, 1, 8, 2),
+        ("Change compressor oil and oil filter", 2000, 180, 900, 60),
+    ]),
+]
+
+
+def load_machines():
+    """Sample machines and service plans; some are due now so the maintenance screen has data."""
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    from apps.maintenance.models import Machine, MaintenancePlan
+
+    now = timezone.now()
+    for code, name, wc, model, meter, plans in MACHINES:
+        m, _ = Machine.objects.update_or_create(code=code, defaults={
+            "name": name, "work_center": WorkCenter.objects.filter(code=wc).first() if wc else None,
+            "make_model": model, "opening_hours": Decimal(meter), "hours_since": now})
+        for task, hours, days, hours_ago, days_ago in plans:
+            MaintenancePlan.objects.update_or_create(machine=m, task=task, defaults={
+                "every_hours": Decimal(hours) if hours else None, "every_days": days,
+                "last_done_hours": Decimal(meter - hours_ago), "last_done_at": now - timedelta(days=days_ago)})

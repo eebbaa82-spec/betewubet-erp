@@ -8,6 +8,7 @@ from apps.inventory.api import (
     IssueView, LocationViewSet, LotViewSet, OffcutRegisterView, OffcutViewSet, ReceiveView, StockMoveViewSet,
     StockSummaryView,
 )
+from apps.maintenance.api import DueView, LogViewSet, MachineViewSet, PlanViewSet
 from apps.production.api import NonConformanceViewSet, OperationViewSet, WorkCenterViewSet, WorkOrderViewSet
 from apps.purchasing.api import (
     DraftOrdersView, PurchaseOrderViewSet, ShortagesView, SupplierItemViewSet, SupplierViewSet,
@@ -31,6 +32,9 @@ router.register("non-conformances", NonConformanceViewSet)
 router.register("suppliers", SupplierViewSet)
 router.register("supplier-items", SupplierItemViewSet)
 router.register("purchase-orders", PurchaseOrderViewSet)
+router.register("machines", MachineViewSet)
+router.register("maintenance-plans", PlanViewSet)
+router.register("maintenance-logs", LogViewSet)
 
 admin.site.site_header = "Betewubet ERP"
 admin.site.site_title = "Betewubet ERP"
@@ -46,6 +50,7 @@ urlpatterns = [
     path("api/offcuts/register/", OffcutRegisterView.as_view()),
     path("api/purchasing/shortages/", ShortagesView.as_view()),
     path("api/purchasing/draft-orders/", DraftOrdersView.as_view()),
+    path("api/maintenance/due/", DueView.as_view()),
     path("api/", include(router.urls)),
     path("api-auth/", include("rest_framework.urls")),
 ]

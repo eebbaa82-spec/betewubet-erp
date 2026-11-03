@@ -186,6 +186,10 @@ class OperationViewSet(viewsets.ReadOnlyModelViewSet):
         op = self.get_object()
         if op.status == WorkOrderOperation.Status.DONE:
             raise serializers.ValidationError({"detail": "This step is already finished."})
+        from apps.maintenance.services import down_reason
+        down = down_reason(op.work_center)
+        if down:
+            raise serializers.ValidationError({"detail": down})
         busy = WorkOrderOperation.objects.filter(
             work_center=op.work_center, status=WorkOrderOperation.Status.RUNNING).exclude(pk=op.pk).first()
         if busy:

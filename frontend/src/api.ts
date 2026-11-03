@@ -353,3 +353,54 @@ export interface PurchaseOrder {
   totals: { subtotal: string; vat_rate: string; vat: string; total: string };
   created_at: string;
 }
+
+export interface MaintenanceLog {
+  id: number;
+  machine: string;
+  machine_name: string;
+  kind: "preventive" | "breakdown";
+  kind_label: string;
+  plan: number | null;
+  description: string;
+  machine_down: boolean;
+  reported_at: string;
+  reported_by: string;
+  closed_at: string | null;
+  action_taken: string;
+  done_by: string;
+  parts_cost: string;
+  machine_hours: string | null;
+  is_open: boolean;
+  downtime_minutes: string;
+}
+
+export interface PlanStatus {
+  id: number;
+  machine: string;
+  machine_name: string;
+  task: string;
+  instructions: string;
+  every_hours: string | null;
+  every_days: number | null;
+  last_done_at: string;
+  last_done_hours: string;
+  hours_now: string;
+  hours_left: string | null;
+  due_date: string | null;
+  used: string;
+  state: "overdue" | "soon" | "ok";
+}
+
+export interface Machine {
+  id: number;
+  code: string;
+  name: string;
+  work_center: string | null;
+  make_model: string;
+  serial_no: string;
+  hours: string;
+  downtime_30d: string;
+  state: "down" | "overdue" | "soon" | "ok";
+  open_logs: MaintenanceLog[];
+  plans: PlanStatus[];
+}
