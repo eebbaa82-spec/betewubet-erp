@@ -4,7 +4,9 @@ from rest_framework import serializers, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from . import costing, services
+from django.http import HttpResponse
+
+from . import costing, cutlist, services
 from django.db.models import Sum
 from django.utils import timezone
 
@@ -128,6 +130,19 @@ class WorkOrderViewSet(viewsets.ReadOnlyModelViewSet):
     def cost(self, request, pk=None):
         """Estimated vs actual cost so far, line by line."""
         return Response(costing.variance(self.get_object()))
+
+    @action(detail=True, url_path="cut-list")
+    def cut_list(self, request, pk=None):
+        """Panels to cut, grouped by board, with part IDs for labels."""
+        return Response(cutlist.cut_list(self.get_object()))
+
+    @action(detail=True, url_path="cut-list/csv")
+    def cut_list_csv(self, request, pk=None):
+        """The same cut list as a CSV file for nesting software."""
+        wo = self.get_object()
+        resp = HttpResponse(cutlist.to_csv(cutlist.cut_list(wo)), content_type="text/csv; charset=utf-8")
+        resp["Content-Disposition"] = f'attachment; filename="{wo.number}-cut-list.csv"'
+        return resp
 
 
 class OperationViewSet(viewsets.ReadOnlyModelViewSet):

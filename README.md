@@ -67,6 +67,8 @@ The sample prices loaded by `seed_demo` are illustrative ETB figures, not real s
 | `/api/sales-orders/`, `/api/sales-order-lines/` | Quotes and orders; lines are priced on save from the target margin |
 | `POST /api/sales-orders/{id}/confirm/` | Quote to order; creates one work order per line |
 | `GET /api/work-orders/{id}/cost/` | Estimated vs actual cost: material, labour, machine, overhead |
+| `GET /api/work-orders/{id}/cut-list/` | Panels to cut grouped by board, with part IDs and a sheet estimate |
+| `GET /api/work-orders/{id}/cut-list/csv/` | The same cut list as CSV for nesting software |
 | `GET /api/operations/?work_center=EDGE`, `POST .../start/`, `POST .../stop/` | What a station tablet uses |
 | `/api/stock-moves/`, `/api/lots/`, `/api/offcuts/` | Inventory ledger, lots and offcuts |
 | `GET /api/auth/me/`, `POST /api/auth/login/`, `POST /api/auth/logout/` | Sign-in for the web app (session cookie + CSRF) |

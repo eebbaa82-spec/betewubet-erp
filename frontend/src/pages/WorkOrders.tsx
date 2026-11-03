@@ -95,6 +95,7 @@ export function WorkOrderDetail() {
           {wo.rework_of && <> · rework of {wo.rework_of}</>}
           {wo.due_date && <> · due {wo.due_date}</>}
         </p>
+        {!wo.rework_of && <p><Link className="btn ghost" to={`/work-orders/${wo.id}/cut-list`}>Cut list and labels</Link></p>}
       </div>
 
       <div className="split even">
