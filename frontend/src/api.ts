@@ -468,3 +468,92 @@ export interface Delivery {
   lines: { line: number; sequence: number; product: string; description: string; configuration: Record<string, string | number>; quantity: string }[];
   installations: Installation[];
 }
+
+export type PaymentStatus = "draft" | "unpaid" | "part_paid" | "paid" | "overdue";
+
+export interface InvoiceRow {
+  id: number;
+  number: string | null;
+  kind: "standard" | "advance";
+  kind_label: string;
+  status: "draft" | "issued";
+  payment_status: PaymentStatus;
+  customer: number;
+  customer_name: string;
+  customer_tin: string;
+  customer_vat_no: string;
+  customer_address: string;
+  order: number | null;
+  order_number: string;
+  delivery: number | null;
+  delivery_number: string;
+  issue_date: string | null;
+  due_date: string | null;
+  fiscal_receipt_no: string;
+  vat_rate: string;
+  notes: string;
+  subtotal: string;
+  vat: string;
+  total: string;
+  paid: string;
+  balance: string;
+  expected_withholding: string;
+  created_at: string;
+}
+
+export interface InvoiceDetail extends InvoiceRow {
+  lines: { id: number; sequence: number; description: string; quantity: string; unit_price: string; amount: string; advance: string | null }[];
+  payments: { id: number; number: string; date: string; amount: string; withholding: string; withholding_receipt_no: string;
+    method: string; method_label: string; reference: string }[];
+}
+
+export interface ToInvoice {
+  deliveries: { delivery: number; number: string; order: string; order_id: number; customer: string; date: string; status: string; value: string }[];
+  orders: { order_id: number; order: string; customer: string; date: string; status: string; value: string; advance_pct: string; advance: string }[];
+}
+
+export interface SupplierBill {
+  id: number;
+  number: string;
+  supplier: number;
+  supplier_name: string;
+  supplier_tin: string;
+  purchase_order: number | null;
+  purchase_order_number: string;
+  supplier_invoice_no: string;
+  bill_date: string;
+  due_date: string;
+  subtotal: string;
+  vat: string;
+  withholding: string;
+  total: string;
+  payable: string;
+  paid: string;
+  balance: string;
+  notes: string;
+  payments: { id: number; number: string; date: string; amount: string; method_label: string; reference: string }[];
+}
+
+export interface ToBill { purchase_order: number; number: string; supplier: string; received: string; unbilled: string }
+
+export interface Aging {
+  buckets: { key: string; label: string }[];
+  customers?: AgingRow[];
+  suppliers?: AgingRow[];
+  totals: Record<string, string>;
+}
+export type AgingRow = { name: string; total: string; documents: { id: number; number: string; due_date: string; days_late: number; balance: string }[] } & Record<string, unknown>;
+
+export interface TaxSummary {
+  period: string;
+  sales: string; output_vat: string; purchases: string; input_vat: string; vat_payable: string;
+  withheld_from_suppliers: string; withheld_by_customers: string;
+  invoices: { id: number; number: string; date: string; customer: string; tin: string; fs_no: string; subtotal: string; vat: string }[];
+  bills: { id: number; number: string; date: string; supplier: string; tin: string; supplier_invoice_no: string; subtotal: string; vat: string; withholding: string }[];
+  withholding_receipts: { payment: string; date: string; customer: string; invoice: string; receipt_no: string; amount: string }[];
+}
+
+export interface FinanceSettings {
+  company_name: string; company_tin: string; company_vat_no: string; company_address: string; company_phone: string;
+  bank_details: string; withholding_rate: string; withholding_threshold: string; payment_terms_days: number; advance_pct: string;
+}

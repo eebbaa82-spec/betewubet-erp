@@ -5,6 +5,7 @@ from rest_framework.routers import DefaultRouter
 from apps.catalog.api import ItemViewSet, ProductTemplateViewSet
 from apps.core.api import LoginView, LogoutView, MeView
 from apps.dispatch.api import DeliveryViewSet, InstallationViewSet, ReadyView
+from apps.finance.api import AgingView, BillViewSet, InvoiceViewSet, SettingsView, TaxView, ToBillView, ToInvoiceView
 from apps.inventory.api import (
     IssueView, LocationViewSet, LotViewSet, OffcutRegisterView, OffcutViewSet, ReceiveView, StockMoveViewSet,
     StockSummaryView,
@@ -33,6 +34,8 @@ router.register("non-conformances", NonConformanceViewSet)
 router.register("suppliers", SupplierViewSet)
 router.register("supplier-items", SupplierItemViewSet)
 router.register("purchase-orders", PurchaseOrderViewSet)
+router.register("invoices", InvoiceViewSet)
+router.register("supplier-bills", BillViewSet)
 router.register("machines", MachineViewSet)
 router.register("maintenance-plans", PlanViewSet)
 router.register("maintenance-logs", LogViewSet)
@@ -55,6 +58,11 @@ urlpatterns = [
     path("api/purchasing/draft-orders/", DraftOrdersView.as_view()),
     path("api/maintenance/due/", DueView.as_view()),
     path("api/dispatch/ready/", ReadyView.as_view()),
+    path("api/finance/to-invoice/", ToInvoiceView.as_view()),
+    path("api/finance/to-bill/", ToBillView.as_view()),
+    path("api/finance/aging/<str:side>/", AgingView.as_view()),
+    path("api/finance/tax/", TaxView.as_view()),
+    path("api/finance/settings/", SettingsView.as_view()),
     path("api/", include(router.urls)),
     path("api-auth/", include("rest_framework.urls")),
 ]

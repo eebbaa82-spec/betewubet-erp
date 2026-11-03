@@ -203,3 +203,15 @@ textarea { font: inherit; color: var(--fg); background: var(--bg); border: 1px s
   .delivery-note .split { grid-template-columns: 1fr 1fr; }
   th.print-only, td.print-only { display: table-cell; }
 }
+
+/* Finance */
+.linkish { font: inherit; background: none; border: 0; padding: 0; color: var(--accent); cursor: pointer; text-align: left; text-decoration: underline; text-underline-offset: 2px; }
+tr.sub td { background: var(--sunk); }
+.field.inline { display: flex; align-items: center; gap: 8px; }
+.panel h4 { margin: 16px 0 6px; font-size: 13px; }
+.invoice-doc .letterhead p { margin: 0; }
+.invoice-doc .letterhead .brand { font-family: var(--display); font-size: 18px; }
+@media print {
+  .invoice-doc .letterhead { display: block; border-bottom: 1px solid #000; padding-bottom: 6px; margin-bottom: 10px; }
+  .invoice-doc p.print-only { display: block; }
+}

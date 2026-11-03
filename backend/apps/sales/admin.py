@@ -5,7 +5,7 @@ from .models import Customer, SalesOrder, SalesOrderLine
 
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):
-    list_display = ["name", "tin", "vat_reg_no", "phone", "city"]
+    list_display = ["name", "tin", "vat_reg_no", "withholds_tax", "phone", "city"]
     search_fields = ["name", "tin"]
 
 
