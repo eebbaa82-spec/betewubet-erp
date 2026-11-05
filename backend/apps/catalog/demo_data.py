@@ -1,5 +1,5 @@
-"""Sample master data: units, work centers, materials and two parametric templates
-(a base cabinet that contains drawer boxes). Prices are illustrative ETB figures,
+"""Sample master data: units, work centers, materials and parametric templates
+(base cabinet with drawer boxes, wardrobe, office desk, bookshelf). Prices are illustrative ETB figures,
 not real supplier prices. Used by ``manage.py seed_demo`` and by the tests."""
 from datetime import date
 from decimal import Decimal
@@ -30,6 +30,10 @@ OTHER_ITEMS = [
     ("HDL-BAR-160", "Bar handle 160 mm, brushed", "hardware", "pcs", 220, None, None),
     ("HDL-KNOB", "Round knob 30 mm", "hardware", "pcs", 90, None, None),
     ("LEG-100", "Adjustable leg 100 mm", "hardware", "pcs", 60, None, None),
+    ("RAIL-25", "Wardrobe rail, oval 25 mm chrome", "hardware", "m", 260, "length", 3),
+    ("RAIL-SUP", "Wardrobe rail end support", "hardware", "pcs", 45, None, None),
+    ("CBL-GROM", "Cable grommet 60 mm", "hardware", "pcs", 120, None, None),
+    ("GLIDE-20", "Furniture glide 20 mm", "hardware", "pcs", 15, None, None),
     ("SCR-CONF", "Confirmat screw 7 x 50", "consumable", "pcs", Decimal("2.5"), "box", 500),
     ("SCR-4x16", "Chipboard screw 4 x 16", "consumable", "pcs", Decimal("0.8"), "box", 1000),
     ("PIN-SHELF", "Shelf support pin", "hardware", "pcs", 3, None, None),
@@ -81,6 +85,9 @@ def load():
 
     _drawer_box()
     _base_cabinet()
+    _wardrobe()
+    _desk()
+    _bookshelf()
 
 
 def _template(code, name, sellable, params):
@@ -210,6 +217,143 @@ def _base_cabinet():
     ])
 
 
+WR_DOORS = "(2 if W <= 1000 else (3 if W <= 1500 else 4))"
+WR_DOOR_W = f"((W - 4) / {WR_DOORS} - 2)"
+BOARD_CHOICES = ["MDF-WHT-18", "CHB-OAK-18", "PLY-BIR-18"]
+
+
+def _wardrobe():
+    t = _template("WARDROBE", "Wardrobe", True, [
+        {"name": "W", "label": "Width (mm)", "kind": "number", "default": "1200", "min_value": 600, "max_value": 2400},
+        {"name": "H", "label": "Height (mm)", "kind": "number", "default": "2100", "min_value": 1600, "max_value": 2400},
+        {"name": "D", "label": "Depth (mm)", "kind": "number", "default": "600", "min_value": 500, "max_value": 650},
+        {"name": "board", "label": "Board", "kind": "item", "item_kind": "board", "default": "CHB-OAK-18",
+         "choices": BOARD_CHOICES},
+        {"name": "front", "label": "Door finish", "kind": "choice", "default": "mel",
+         "choices": [["mel", "Same melamine as carcass"], ["lac", "MDF, lacquer sprayed"]]},
+        {"name": "shelves", "label": "Shelves", "kind": "number", "default": "2", "min_value": 0, "max_value": 6},
+    ])
+    carcass = {"component": "Carcass", "line_type": "panel", "item_param": "board", "edge_item": "EB-22-04"}
+    door = {"component": "Fronts", "line_type": "panel", "qty_formula": WR_DOORS, "length_formula": "H - 4",
+            "width_formula": WR_DOOR_W}
+    _lines(t, [
+        {**carcass, "name": "Side panel", "qty_formula": "2", "length_formula": "H", "width_formula": "D",
+         "edge_formula": "H"},
+        {**carcass, "name": "Top and bottom", "qty_formula": "2", "length_formula": "W - 2*board_t",
+         "width_formula": "D", "edge_formula": "W - 2*board_t"},
+        {**carcass, "name": "Shelf", "qty_formula": "shelves", "condition": "shelves > 0",
+         "length_formula": "W - 2*board_t - 2", "width_formula": "D - 60", "edge_formula": "W - 2*board_t - 2"},
+        {"component": "Carcass", "name": "Back panel", "line_type": "panel", "item": "HDF-WHT-3",
+         "length_formula": "W - 10", "width_formula": "H - 10"},
+        {**door, "name": "Door", "condition": "front == 'mel'", "item_param": "board",
+         "edge_formula": f"2*((H - 4) + {WR_DOOR_W})", "edge_item": "EB-22-2"},
+        {**door, "name": "Door, lacquered", "condition": "front == 'lac'", "item": "MDF-RAW-18"},
+        {"component": "Hardware", "name": "Hanging rail", "line_type": "item", "item": "RAIL-25",
+         "qty_formula": "(W - 2*board_t) / 1000"},
+        {"component": "Hardware", "name": "Rail support", "line_type": "item", "item": "RAIL-SUP", "qty_formula": "2"},
+        {"component": "Hardware", "name": "Hinge", "line_type": "item", "item": "HNG-SC-110",
+         "qty_formula": f"{WR_DOORS} * (4 if H > 1900 else 3)"},
+        {"component": "Hardware", "name": "Bar handle", "line_type": "item", "item": "HDL-BAR-160",
+         "qty_formula": WR_DOORS},
+        {"component": "Hardware", "name": "Shelf pin", "line_type": "item", "item": "PIN-SHELF",
+         "qty_formula": "4*shelves", "condition": "shelves > 0"},
+        {"component": "Hardware", "name": "Glide", "line_type": "item", "item": "GLIDE-20", "qty_formula": "4"},
+        {"component": "Hardware", "name": "Confirmat screw", "line_type": "item", "item": "SCR-CONF",
+         "qty_formula": "16"},
+        {"component": "Finish", "name": "White lacquer, 2 coats both sides", "line_type": "item", "item": "LAC-PU",
+         "condition": "front == 'lac'", "qty_formula": "(W - 4) * (H - 4) / 1000000 * 2 * 2 * 0.12"},
+    ])
+    _routing(t, [
+        ("SAW", "1.2*n_panels + 6", ""),
+        ("EDGE", "0.4*edge_m + 0.5*n_panels", ""),
+        ("CNC", "1.8*n_panels + 2", ""),
+        ("SAND", f"8*{WR_DOORS}", "front == 'lac'"),
+        ("SPRAY", "22*front_m2*2 + 10", "front == 'lac'"),
+        ("ASM", f"40 + 5*{WR_DOORS}", ""),
+        ("PACK", "15", ""),
+    ])
+
+
+def _desk():
+    t = _template("DESK", "Office desk", True, [
+        {"name": "W", "label": "Width (mm)", "kind": "number", "default": "1400", "min_value": 1000, "max_value": 2000},
+        {"name": "D", "label": "Depth (mm)", "kind": "number", "default": "700", "min_value": 600, "max_value": 900},
+        {"name": "H", "label": "Height (mm)", "kind": "number", "default": "750", "min_value": 700, "max_value": 780},
+        {"name": "board", "label": "Board", "kind": "item", "item_kind": "board", "default": "CHB-OAK-18",
+         "choices": BOARD_CHOICES},
+        {"name": "drawers", "label": "Pedestal drawers (0 = none)", "kind": "number", "default": "3",
+         "min_value": 0, "max_value": 3},
+        {"name": "grommet", "label": "Cable grommet", "kind": "choice", "default": "yes",
+         "choices": [["yes", "Yes"], ["no", "No"]]},
+    ])
+    panel = {"component": "Desk", "line_type": "panel", "item_param": "board", "edge_item": "EB-22-2"}
+    _lines(t, [
+        {**panel, "name": "Top", "length_formula": "W", "width_formula": "D", "edge_formula": "2*(W + D)"},
+        {**panel, "name": "Side panel", "qty_formula": "2", "length_formula": "H - board_t",
+         "width_formula": "D - 50", "edge_formula": "2*(H - board_t)"},
+        {**panel, "name": "Modesty panel", "length_formula": "W - 2*board_t", "width_formula": "350",
+         "edge_formula": "W - 2*board_t"},
+        {**panel, "name": "Pedestal side", "condition": "drawers > 0", "length_formula": "H - board_t - 20",
+         "width_formula": "D - 100", "edge_formula": "H - board_t - 20"},
+        {"component": "Fronts", "name": "Drawer front", "line_type": "panel", "item_param": "board",
+         "edge_item": "EB-22-2", "condition": "drawers > 0", "qty_formula": "drawers",
+         "length_formula": "396", "width_formula": "((H - board_t - 60) / drawers - 3)",
+         "edge_formula": "2*(396 + (H - board_t - 60) / drawers - 3)"},
+        {"component": "Drawers", "name": "Drawer box", "line_type": "subassembly", "condition": "drawers > 0",
+         "child_template": "DRAWER-BOX", "qty_formula": "drawers",
+         "child_params": {"W": "360", "D": "D - 160", "H": "100", "board": "board"}},
+        {"component": "Hardware", "name": "Bar handle", "line_type": "item", "item": "HDL-BAR-160",
+         "condition": "drawers > 0", "qty_formula": "drawers"},
+        {"component": "Hardware", "name": "Cable grommet", "line_type": "item", "item": "CBL-GROM",
+         "condition": "grommet == 'yes'"},
+        {"component": "Hardware", "name": "Glide", "line_type": "item", "item": "GLIDE-20", "qty_formula": "4"},
+        {"component": "Hardware", "name": "Confirmat screw", "line_type": "item", "item": "SCR-CONF",
+         "qty_formula": "12 + (8 if drawers > 0 else 0)"},
+    ])
+    _routing(t, [
+        ("SAW", "1.2*n_panels + 4", ""),
+        ("EDGE", "0.4*edge_m + 0.5*n_panels", ""),
+        ("CNC", "1.8*n_panels + (4 if grommet == 'yes' else 0)", ""),
+        ("ASM", "20", ""),
+        ("PACK", "12", ""),
+    ])
+
+
+def _bookshelf():
+    t = _template("BOOKSHELF", "Bookshelf", True, [
+        {"name": "W", "label": "Width (mm)", "kind": "number", "default": "900", "min_value": 400, "max_value": 1200},
+        {"name": "H", "label": "Height (mm)", "kind": "number", "default": "1800", "min_value": 800, "max_value": 2200},
+        {"name": "D", "label": "Depth (mm)", "kind": "number", "default": "300", "min_value": 250, "max_value": 400},
+        {"name": "board", "label": "Board", "kind": "item", "item_kind": "board", "default": "MDF-WHT-18",
+         "choices": BOARD_CHOICES},
+        {"name": "shelves", "label": "Adjustable shelves", "kind": "number", "default": "4", "min_value": 1,
+         "max_value": 7},
+    ])
+    carcass = {"component": "Carcass", "line_type": "panel", "item_param": "board", "edge_item": "EB-22-04"}
+    _lines(t, [
+        {**carcass, "name": "Side panel", "qty_formula": "2", "length_formula": "H", "width_formula": "D",
+         "edge_formula": "H"},
+        {**carcass, "name": "Top and bottom", "qty_formula": "2", "length_formula": "W - 2*board_t",
+         "width_formula": "D", "edge_formula": "W - 2*board_t"},
+        {**carcass, "name": "Shelf", "qty_formula": "shelves", "length_formula": "W - 2*board_t - 2",
+         "width_formula": "D - 20", "edge_formula": "W - 2*board_t - 2"},
+        {"component": "Carcass", "name": "Back panel", "line_type": "panel", "item": "HDF-WHT-3",
+         "length_formula": "W - 10", "width_formula": "H - 10"},
+        {"component": "Hardware", "name": "Shelf pin", "line_type": "item", "item": "PIN-SHELF",
+         "qty_formula": "4*shelves"},
+        {"component": "Hardware", "name": "Glide", "line_type": "item", "item": "GLIDE-20", "qty_formula": "4"},
+        {"component": "Hardware", "name": "Confirmat screw", "line_type": "item", "item": "SCR-CONF",
+         "qty_formula": "8"},
+    ])
+    _routing(t, [
+        ("SAW", "1.2*n_panels + 3", ""),
+        ("EDGE", "0.4*edge_m + 0.5*n_panels", ""),
+        ("CNC", "1.5*n_panels", ""),
+        ("ASM", "15", ""),
+        ("PACK", "8", ""),
+    ])
+
+
 def load_stock():
     """Opening stock, lots and a few offcuts so the inventory screens have data."""
     from apps.inventory.models import Location, Lot
@@ -226,7 +370,8 @@ def load_stock():
         lot = Lot.objects.create(item=item, code=f"L-{code}-01", received_on=date(2026, 10, 15))
         receive(item, sheet_m2 * sheets, item.standard_cost, main, lot=lot, reference="OPENING")
     for code, qty in [("EB-22-04", 1840), ("EB-22-2", 620), ("HNG-SC-110", 420), ("SLD-450", 38),
-                      ("HDL-BAR-160", 260), ("HDL-KNOB", 140), ("LEG-100", 600), ("SCR-CONF", 5200),
+                      ("HDL-BAR-160", 260), ("HDL-KNOB", 140), ("LEG-100", 600), ("RAIL-25", 60), ("RAIL-SUP", 80), ("CBL-GROM", 40),
+                      ("GLIDE-20", 400), ("SCR-CONF", 5200),
                       ("SCR-4x16", 8000), ("PIN-SHELF", 900), ("GLUE-PVA", 35), ("LAC-PU", 68), ("LAC-CLR", 22)]:
         item = Item.objects.get(code=code)
         lot = Lot.objects.create(item=item, code=f"L-{code}-01", received_on=date(2026, 10, 15)) \
