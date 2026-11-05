@@ -40,7 +40,12 @@ def main():
     else:
         print("An admin user already exists; nothing to do.")
     if "--sample" in sys.argv:
-        call_command("seed_showcase")
+        from apps.sales.models import SalesOrder
+
+        if SalesOrder.objects.exists():
+            print("Sample data skipped: the database already has orders, so it was probably loaded already.")
+        else:
+            call_command("seed_showcase")
     elif "--master-data" in sys.argv:
         call_command("seed_demo")
     print("Done. Restart the app in Setup Python App.")

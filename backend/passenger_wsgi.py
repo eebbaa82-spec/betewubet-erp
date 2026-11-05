@@ -1,11 +1,8 @@
-"""Entry point for cPanel "Setup Python App" (Phusion Passenger).
-
-Passenger looks for a module called passenger_wsgi with an ``application`` object in the
-application root, which should be this backend/ folder."""
+"""Entry point for Phusion Passenger. cPanel usually replaces this file with its own loader for
+the startup file (app_wsgi.py), which works the same way."""
 import os
 import sys
 
-sys.path.insert(0, os.path.dirname(__file__))
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from config.wsgi import application  # noqa: E402,F401
+from app_wsgi import application  # noqa: E402,F401
