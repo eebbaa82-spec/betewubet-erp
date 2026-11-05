@@ -12,3 +12,6 @@ dist/
 .pytest_cache/
 .DS_Store
 *.tsbuildinfo
+backend/FIRST_LOGIN.txt
+site.env
+dist-cpanel/

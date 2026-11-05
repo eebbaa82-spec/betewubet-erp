@@ -1,5 +1,10 @@
 // Thin client for the Django REST API. Uses the session cookie and sends the CSRF token on writes.
 
+/** Where the app lives on the web server: "" at the domain root, or e.g. "/Betewubet". Set at build time. */
+export const APP_ROOT = (import.meta.env.VITE_APP_ROOT ?? "").replace(/\/+$/, "");
+/** A server path (/api/..., /admin/) with the app's root in front. */
+export const url = (path: string) => `${APP_ROOT}${path}`;
+
 export class ApiError extends Error {
   constructor(public status: number, public messages: string[]) {
     super(messages.join(" "));
@@ -30,7 +35,7 @@ export async function api<T>(path: string, options: { method?: string; body?: un
     headers["Content-Type"] = "application/json";
     headers["X-CSRFToken"] = csrfToken();
   }
-  const res = await fetch(path, {
+  const res = await fetch(url(path), {
     method,
     headers,
     credentials: "same-origin",

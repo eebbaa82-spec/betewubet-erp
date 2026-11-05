@@ -16,8 +16,16 @@ env = environ.Env(
     CSRF_TRUSTED_ORIGINS=(list, ["http://localhost:5173", "http://127.0.0.1:5173"]),
 )
 environ.Env.read_env(BASE_DIR.parent / ".env")
+# On cPanel the settings sit in site.env (a visible file is easier to edit in File Manager).
+environ.Env.read_env(BASE_DIR.parent / "site.env")
 
 SECRET_KEY = env("SECRET_KEY", default="dev-only-insecure-key-change-me")
+
+# Where the app lives on the web server: "" at the domain root, or e.g. "/Betewubet" for
+# https://www.eruditeafrica.net/Betewubet/. Must match VITE_APP_ROOT used to build the web app.
+URL_PREFIX = env("URL_PREFIX", default="").rstrip("/")
+FORCE_SCRIPT_NAME = URL_PREFIX or None
+SESSION_COOKIE_PATH = CSRF_COOKIE_PATH = f"{URL_PREFIX}/"
 DEBUG = env("DEBUG")
 ALLOWED_HOSTS = env("ALLOWED_HOSTS")
 # The web app's address (the Vite dev server in development).
@@ -45,6 +53,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -76,6 +85,14 @@ WSGI_APPLICATION = "config.wsgi.application"
 DATABASES = {
     "default": env.db("DATABASE_URL", default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}"),
 }
+if DATABASES["default"]["ENGINE"] == "django.db.backends.mysql":
+    # cPanel hosting usually offers MySQL/MariaDB. PyMySQL is pure Python, so it installs
+    # without a compiler, unlike mysqlclient.
+    import pymysql
+
+    pymysql.install_as_MySQLdb()
+    DATABASES["default"].setdefault("OPTIONS", {}).update(
+        {"charset": "utf8mb4", "init_command": "SET sql_mode='STRICT_TRANS_TABLES'"})
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -90,8 +107,21 @@ TIME_ZONE = "Africa/Addis_Ababa"
 USE_I18N = True
 USE_TZ = True
 
-STATIC_URL = "static/"
-STATIC_ROOT = BASE_DIR / "staticfiles"
+STATIC_URL = f"{URL_PREFIX}/static/"
+STATIC_ROOT = env.str("STATIC_ROOT", default=str(BASE_DIR / "staticfiles"))
+# The built web app (frontend/dist) is served as static files under static/app/.
+FRONTEND_DIST = env.str("FRONTEND_DIST", default=str(BASE_DIR.parent / "frontend" / "dist"))
+STATICFILES_DIRS = [("app", FRONTEND_DIST)] if Path(FRONTEND_DIST).is_dir() else []
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
+}
+
+# Behind HTTPS (cPanel AutoSSL or any proxy): secure cookies and trust the proxy's scheme header.
+HTTPS = env.bool("HTTPS", default=not DEBUG)
+if HTTPS:
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SESSION_COOKIE_SECURE = CSRF_COOKIE_SECURE = True
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

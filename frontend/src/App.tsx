@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { NavLink, Navigate, Route, Routes } from "react-router-dom";
 
-import { api, User } from "./api";
+import { api, url, User } from "./api";
 import Configure from "./pages/Configure";
 import CutList from "./pages/CutList";
 import Dispatch, { DeliveryNote } from "./pages/Dispatch";
@@ -53,7 +53,7 @@ export default function App() {
             <NavLink to="/dispatch">Dispatch</NavLink>
             <NavLink to="/maintenance">Maintenance</NavLink>
             <NavLink to="/finance">Finance</NavLink>
-            <a href="/admin/">Back office</a>
+            <a href={url("/admin/")}>Back office</a>
           </nav>
           <span className="who">
             {user.name}
