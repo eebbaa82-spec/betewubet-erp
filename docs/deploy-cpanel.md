@@ -17,7 +17,7 @@ This makes `dist-cpanel/betewubet-erp-cpanel.zip`: the backend, the web app alre
 
 ## 2. Create the database
 
-cPanel > **MySQL Databases**:
+cPanel > **MySQL Databases** (newer cPanel: **Database Wizard**, not the PostgreSQL one):
 
 1. Create a database, e.g. `betewubet`. cPanel adds your account name in front, e.g. `erudite_betewubet`.
 2. Create a user, e.g. `betewubet`, with a long password made of **letters and numbers only**.
@@ -56,7 +56,7 @@ No *Execute python script* box? Use cPanel > **Terminal**: copy the "Enter to th
 environment" command shown at the top of the app page, paste it, then run
 `cd ~/betewubet-erp/backend && python cpanel_setup.py`.
 
-To load the made-up sample month for a demonstration, run `python cpanel_setup.py --sample`
+To load the made-up sample month for a demonstration, run `cpanel_setup.py --sample`
 instead (only on an empty database). For an empty system with just the sample products and
 materials, use `--master-data`.
 
@@ -73,6 +73,8 @@ Go to `https://www.eruditeafrica.net/Betewubet/` and sign in as `admin`. Change 
 
 ## If something goes wrong
 
+- **"Script exit code: 1"** after Run Script: scroll down in the output box under the button; the last
+  lines under *stderr* say what failed.
 - **Error page or "Incomplete response"**: open `betewubet-erp/backend/stderr.log` in File Manager;
   the last lines say what failed.
 - **"Access denied for user"**: the user was not added to the database (step 2.3), or the
