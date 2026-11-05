@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { NavLink, Navigate, Route, Routes } from "react-router-dom";
 
 import { api, url, User } from "./api";
+import Logo from "./Logo";
 import Configure from "./pages/Configure";
 import CutList from "./pages/CutList";
 import Dispatch, { DeliveryNote } from "./pages/Dispatch";
@@ -41,7 +42,7 @@ export default function App() {
     <UserContext.Provider value={user}>
       <header className="topbar">
         <div className="wrap topbar-inner">
-          <span className="brand">Betewubet ERP</span>
+          <NavLink to="/configure" className="brand"><Logo /><span>Betewubet<small>ERP</small></span></NavLink>
           <nav>
             <NavLink to="/configure">Configure and quote</NavLink>
             <NavLink to="/quotes">Quotes and orders</NavLink>

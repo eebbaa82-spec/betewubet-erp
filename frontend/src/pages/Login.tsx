@@ -1,6 +1,7 @@
 import { FormEvent, useState } from "react";
 
 import { api, ApiError, User } from "../api";
+import Logo from "../Logo";
 
 export default function Login({ onSignedIn }: { onSignedIn: (u: User) => void }) {
   const [username, setUsername] = useState("");
@@ -26,8 +27,9 @@ export default function Login({ onSignedIn }: { onSignedIn: (u: User) => void })
   return (
     <div className="login">
       <form className="panel stack" onSubmit={submit}>
-        <div>
-          <h1 className="brand">Betewubet ERP</h1>
+        <div className="login-head">
+          <Logo height={96} />
+          <h1 className="brand">Betewubet</h1>
           <p className="muted">Home and Office Furniture Manufacturing PLC</p>
         </div>
         <label className="field">
