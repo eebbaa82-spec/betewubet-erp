@@ -60,5 +60,7 @@ def confirm(order):
         work_orders.append(create_work_order(line.template, line.configuration, line.quantity,
                                              sales_line=line, due_date=order.due_date))
     order.status = SalesOrder.Status.CONFIRMED
-    order.save(update_fields=["status"])
+    if order.number.startswith("Q-"):
+        order.number = "SO-" + order.number[2:]  # a confirmed order is no longer a quote
+    order.save(update_fields=["status", "number"])
     return work_orders

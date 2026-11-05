@@ -43,7 +43,9 @@ cd backend
 python -m venv .venv && . .venv/bin/activate
 pip install -r requirements-dev.txt
 python manage.py migrate
-python manage.py seed_demo           # sample units, materials, cabinet templates, opening stock
+python manage.py seed_demo           # sample units, materials, product templates, opening stock
+# or, on an empty database, a made-up month of orders, production, deliveries and invoices:
+# python manage.py seed_showcase
 python manage.py createsuperuser
 python manage.py runserver
 ```
@@ -62,7 +64,7 @@ and open http://localhost:5173. It forwards `/api` and `/admin` to the Django se
 
 Without `DATABASE_URL` the project uses SQLite. To run with PostgreSQL instead: `docker compose up`, or copy `.env.example` to `.env` and point `DATABASE_URL` at your server.
 
-The sample prices loaded by `seed_demo` are illustrative ETB figures, not real supplier prices.
+The sample prices loaded by `seed_demo` are illustrative ETB figures, not real supplier prices. `seed_showcase` adds seven invented customers with orders at every stage (quotes, deposits, production, inspection, delivery, installation, paid and overdue invoices), purchase orders and supplier bills, inspections and machine service history, all dated relative to the day it is run.
 
 ## Main API endpoints
 

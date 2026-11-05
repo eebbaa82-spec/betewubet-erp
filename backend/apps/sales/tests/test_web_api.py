@@ -52,7 +52,7 @@ def test_confirmed_order_lines_are_locked(demo):
 def test_page_size_and_filters(demo):
     client = APIClient()
     client.force_authenticate(User.objects.create_user("u"))
-    assert len(client.get("/api/items/?page_size=500").json()["results"]) == 19
+    assert len(client.get("/api/items/?page_size=500").json()["results"]) == 23
     assert all(i["kind"] == "board" for i in client.get("/api/items/?kind=board").json()["results"])
     codes = [t["code"] for t in client.get("/api/templates/?sellable=1").json()["results"]]
-    assert codes == ["BASE-CAB"]
+    assert codes == ["BASE-CAB", "BOOKSHELF", "DESK", "WARDROBE"]
