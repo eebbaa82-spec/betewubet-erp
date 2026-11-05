@@ -41,7 +41,7 @@ cPanel > **Setup Python App** > **Create Application**:
 | Python version | the newest offered, at least 3.10 |
 | Application root | `betewubet-erp/backend` |
 | Application URL | `www.eruditeafrica.net` / `Betewubet` |
-| Application startup file | `passenger_wsgi.py` |
+| Application startup file | `app_wsgi.py` (not `passenger_wsgi.py`) |
 | Application Entry point | `application` |
 
 Click **Create**. Then, on the same page:
@@ -75,6 +75,9 @@ Go to `https://www.eruditeafrica.net/Betewubet/` and sign in as `admin`. Change 
 
 - **"Script exit code: 1"** after Run Script: scroll down in the output box under the button; the last
   lines under *stderr* say what failed.
+- **500 page, and `stderr.log` ends in "RecursionError" with `load_source('wsgi', 'passenger_wsgi.py')`**:
+  the startup file was set to `passenger_wsgi.py`. Set *Application startup file* to `app_wsgi.py`,
+  click **Save**, then **Restart**.
 - **Error page or "Incomplete response"**: open `betewubet-erp/backend/stderr.log` in File Manager;
   the last lines say what failed.
 - **"Access denied for user"**: the user was not added to the database (step 2.3), or the
