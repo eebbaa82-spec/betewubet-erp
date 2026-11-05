@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { api, FinanceSettings, InvoiceDetail } from "../api";
 import { qty as fmtQty, today } from "../format";
+import Logo from "../Logo";
 import { errText, etb, PAY_LABEL, payChip } from "./Finance";
 
 export default function InvoiceView() {
@@ -61,9 +62,12 @@ export default function InvoiceView() {
         <div>
           <p className="muted no-print"><Link to="/finance?tab=invoices">Finance</Link></p>
           {co && <div className="print-only letterhead">
-            <p className="brand">{co.company_name}</p>
-            <p className="small">{co.company_address}{co.company_phone && ` · ${co.company_phone}`}</p>
-            <p className="small">{co.company_tin && `TIN ${co.company_tin}`}{co.company_vat_no && ` · VAT reg. ${co.company_vat_no}`}</p>
+            <Logo height={56} />
+            <div>
+              <p className="brand">{co.company_name}</p>
+              <p className="small">{co.company_address}{co.company_phone && ` · ${co.company_phone}`}</p>
+              <p className="small">{co.company_tin && `TIN ${co.company_tin}`}{co.company_vat_no && ` · VAT reg. ${co.company_vat_no}`}</p>
+            </div>
           </div>}
           <h2>{inv.kind === "advance" ? "Advance invoice" : "Tax invoice"} <span className="mono">{inv.number ?? "(draft)"}</span></h2>
           <p className="muted"><span className={`chip ${payChip(inv.payment_status)}`}>{PAY_LABEL[inv.payment_status]}</span>

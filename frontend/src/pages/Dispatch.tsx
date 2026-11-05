@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { api, ApiError, Delivery, Installation, Page, ReadyOrder } from "../api";
 import { configSummary, qty as fmtQty, today } from "../format";
+import Logo from "../Logo";
 
 type Tab = "ready" | "deliveries" | "installs";
 const errText = (e: unknown) => (e instanceof ApiError ? e.message : "Could not reach the server.");
@@ -223,7 +224,8 @@ export function DeliveryNote() {
       <div className="row between">
         <div>
           <p className="muted no-print"><Link to="/dispatch">Dispatch</Link></p>
-          <p className="print-only brand">Betewubet Home and Office Furniture Manufacturing PLC</p>
+          <div className="print-only letterhead"><Logo height={48} />
+            <p className="brand">Betewubet Home and Office Furniture Manufacturing PLC</p></div>
           <h2>Delivery note <span className="mono">{d.number}</span></h2>
           <p className="muted"><span className={`chip dn-${d.status}`}>{d.status_label}</span> · {d.scheduled_date}
             {d.dispatched_at && <> · left {when(d.dispatched_at)}</>}{d.delivered_at && <> · delivered {when(d.delivered_at)}</>}</p>

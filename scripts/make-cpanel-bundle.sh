@@ -28,4 +28,8 @@ HTTPS=true
 SECRET_KEY=$SECRET
 ENV
 (cd "$OUT" && zip -qr betewubet-erp-cpanel.zip betewubet-erp)
+# For updating a running site: no site.env (keeps the live settings) and no passenger_wsgi.py
+# (cPanel manages that file).
+(cd "$OUT" && zip -qr betewubet-erp-update.zip betewubet-erp -x 'betewubet-erp/site.env' 'betewubet-erp/backend/passenger_wsgi.py')
 echo "$OUT/betewubet-erp-cpanel.zip"
+echo "$OUT/betewubet-erp-update.zip"

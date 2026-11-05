@@ -1,0 +1,36 @@
+{% extends "admin/base.html" %}
+{% load static %}
+{% comment %}Back office in the Betewubet colours (see frontend/src/styles.css).{% endcomment %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | Betewubet back office{% endblock %}
+
+{% block extrahead %}
+<link rel="icon" type="image/png" href="{% static 'app/favicon.png' %}">
+{% endblock %}
+
+{% block extrastyle %}
+<style>
+  :root, html[data-theme="light"] {
+    --primary: #8a6231; --secondary: #1a1714; --accent: #cbb28b; --primary-fg: #fff;
+    --header-color: #f3ebde; --header-branding-color: #fff; --header-bg: #1a1714; --header-link-color: #fff;
+    --breadcrumbs-fg: #f3ebde; --breadcrumbs-link-fg: #fff; --breadcrumbs-bg: #8a6231;
+    --link-fg: #8a6231; --link-hover-color: #5e421f; --link-selected-fg: #5e421f;
+    --button-bg: #8a6231; --button-hover-bg: #6f4e26; --default-button-bg: #5e421f; --default-button-hover-bg: #1a1714;
+    --selected-row: #f3ebde; --selected-bg: #f0ece5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --primary: #d4a76a; --link-fg: #d4a76a; --link-hover-color: #ecc994; --link-selected-fg: #ecc994; --selected-row: #33281b; }
+  }
+  html[data-theme="dark"] { --primary: #d4a76a; --link-fg: #d4a76a; --link-hover-color: #ecc994; --link-selected-fg: #ecc994; --selected-row: #33281b; }
+  #header { border-bottom: 3px solid #b0834d; }
+  #site-name a { display: inline-flex; align-items: center; gap: 10px; }
+  #site-name img { height: 34px; width: auto; }
+</style>
+{% endblock %}
+
+{% block branding %}
+<div id="site-name"><a href="{% url 'admin:index' %}"><img src="{% static 'app/logo-dark.png' %}" alt="">Betewubet back office</a></div>
+{% if user.is_anonymous %}{% include "admin/color_theme_toggle.html" %}{% endif %}
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
