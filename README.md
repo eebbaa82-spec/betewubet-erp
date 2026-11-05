@@ -109,3 +109,7 @@ cd frontend && npm run build      # type-checks and builds the web app
 ```
 
 The test suite runs on every pull request against PostgreSQL 16 (see `.github/workflows/tests.yml`).
+
+## Hosting
+
+To run it on cPanel hosting under a sub-path such as `https://www.eruditeafrica.net/Betewubet/`, see [docs/deploy-cpanel.md](docs/deploy-cpanel.md). The app works with PostgreSQL, MySQL/MariaDB (tests pass on MariaDB 10.11) or SQLite.

@@ -2,7 +2,7 @@ import QRCode from "qrcode";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
-import { api, CutList as CutListData, CutPart } from "../api";
+import { api, CutList as CutListData, CutPart, url } from "../api";
 import { dec2, plural } from "../format";
 
 type View = "list" | "labels";
@@ -42,7 +42,7 @@ export default function CutList() {
               <button role="tab" aria-selected={view === "list"} onClick={() => setView("list")}>Cut list</button>
               <button role="tab" aria-selected={view === "labels"} onClick={() => setView("labels")}>Panel labels</button>
             </div>
-            <a className="btn ghost" href={`/api/work-orders/${id}/cut-list/csv/`} download>Download CSV</a>
+            <a className="btn ghost" href={url(`/api/work-orders/${id}/cut-list/csv/`)} download>Download CSV</a>
             <button className="btn" onClick={() => window.print()}>Print {view === "list" ? "cut list" : "labels"}</button>
           </div>
           {view === "list" ? <Sheets cl={cl} /> : <Labels cl={cl} />}

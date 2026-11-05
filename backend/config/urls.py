@@ -1,8 +1,9 @@
 from django.contrib import admin
-from django.urls import include, path
+from django.urls import include, path, re_path
 from rest_framework.routers import DefaultRouter
 
 from apps.catalog.api import ItemViewSet, ProductTemplateViewSet
+from apps.core import webapp
 from apps.core.api import LoginView, LogoutView, MeView
 from apps.dispatch.api import DeliveryViewSet, InstallationViewSet, ReadyView
 from apps.finance.api import AgingView, BillViewSet, InvoiceViewSet, SettingsView, TaxView, ToBillView, ToInvoiceView
@@ -69,4 +70,6 @@ urlpatterns = [
     path("api/quality/awaiting-final/", AwaitingFinalView.as_view()),
     path("api/", include(router.urls)),
     path("api-auth/", include("rest_framework.urls")),
+    # Everything else is a page of the web app.
+    re_path(r"^(?!api/|api-auth/|admin/|static/).*$", webapp.index),
 ]
