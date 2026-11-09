@@ -68,9 +68,11 @@ Go to `https://www.eruditeafrica.net/Betewubet/` and sign in as `admin`. Change 
 
 ## Updating to a new version
 
-1. Build a new zip (step 1). Upload and extract it over the old folder, but **keep your
-   `site.env`** (don't overwrite it with the new one).
-2. In Setup Python App: **Run Pip Install**, run `cpanel_setup.py` again, then **Restart**.
+1. Build the zips (step 1) and use `betewubet-erp-update.zip`. It has no `site.env`, so your live
+   settings stay as they are.
+2. In File Manager, upload it to your home folder, right-click it > **Extract**, and let it replace
+   the old files.
+3. In Setup Python App: **Run Pip Install**, run `cpanel_setup.py`, then **Restart**.
 
 ## If something goes wrong
 
