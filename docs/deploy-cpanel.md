@@ -63,7 +63,8 @@ materials, use `--master-data`.
 ## 5. Open it
 
 Go to `https://www.eruditeafrica.net/Betewubet/` and sign in as `admin`. Change the password in
-**Back office > Users**, and add a user for each member of staff there.
+**Back office > Users**, and add a user for each member of staff there. Leave
+*Staff status* unticked for them: only users with it see the Back office link.
 
 ## Updating to a new version
 

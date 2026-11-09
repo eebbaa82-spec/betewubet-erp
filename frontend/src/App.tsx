@@ -54,7 +54,7 @@ export default function App() {
             <NavLink to="/dispatch">Dispatch</NavLink>
             <NavLink to="/maintenance">Maintenance</NavLink>
             <NavLink to="/finance">Finance</NavLink>
-            <a href={url("/admin/")}>Back office</a>
+            {user.is_staff && <a href={url("/admin/")}>Back office</a>}
           </nav>
           <span className="who">
             {user.name}
